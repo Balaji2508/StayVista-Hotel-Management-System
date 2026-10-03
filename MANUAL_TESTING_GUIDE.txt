@@ -1,0 +1,1636 @@
+===============================================================================
+ONLINE HOTEL MANAGEMENT SYSTEM (HMS) / i-TRANSFORM HMS
+COMPLETE MANUAL TESTING GUIDE & STEP-BY-STEP API EXECUTION MANUAL
+===============================================================================
+
+-------------------------------------------------------------------------------
+TABLE OF CONTENTS
+-------------------------------------------------------------------------------
+1.  SYSTEM OVERVIEW, PORTS & PREREQUISITES
+2.  AUTHENTICATION, ROLES & JWT SETUP
+3.  END-TO-END WORKFLOW TESTING SEQUENCE (MASTER DEMO SCENARIOS)
+    - Scenario 1: Hotel Setup & Master Data Configuration
+    - Scenario 2: Guest Registration, Room Search & Dynamic Price Quote
+    - Scenario 3: Reservation Creation, Idempotent Payment & Saga Confirmation
+    - Scenario 4: Front Desk Check-In & Room Occupancy
+    - Scenario 5: Guest QR Service Request & Housekeeping Delivery Workflow
+    - Scenario 6: Late Checkout Request, Breakage Reporting & Billing Adjustment
+    - Scenario 7: Check-Out, Final Billing, Payment & Room Cleaning Lifecycle
+    - Scenario 8: Room Waitlist & Automatic Availability Notification
+    - Scenario 9: Reservation Cancellation, Saga Compensation & Refund
+    - Scenario 10: Inventory Stock Movements & Low-Stock Alerts
+    - Scenario 11: Maintenance Ticket Lifecycle & Room Status Lock
+    - Scenario 12: Cash Drawer Session Management & Balancing
+    - Scenario 13: Shift Handover Logging & Acknowledgment
+    - Scenario 14: Guest Stay Feedback, Complaints & Loyalty Rewards
+    - Scenario 15: Hotel Analytics, Scheduled Daily Summary & Notifications
+4.  COMPLETE API ENDPOINT REFERENCE (BY MICROSERVICE MODULE)
+    - Module 1: Auth Service (Port 8081 / Gateway 8080)
+    - Module 2: Guest Service (Port 8082 / Gateway 8080)
+    - Module 3: Room Service (Port 8083 / Gateway 8080)
+    - Module 4: Rate Service (Port 8087 / Gateway 8080)
+    - Module 5: Reservation Service (Port 8084 / Gateway 8080)
+    - Module 6: Payment Service (Port 8085 / Gateway 8080)
+    - Module 7: Billing Service (Port 8086 / Gateway 8080)
+    - Module 8: Staff Service (Port 8088 / Gateway 8080)
+    - Module 9: Inventory Service (Port 8089 / Gateway 8080)
+    - Module 10: Operations Service (Port 8091 / Gateway 8080)
+    - Module 11: Guest Experience Service (Port 8090 / Gateway 8080)
+    - Module 12: Reporting Service (Port 8092 / Gateway 8080)
+    - Module 13: Notification Service (Port 8093 / Gateway 8080)
+5.  NEGATIVE, VALIDATION & SECURITY TEST SCENARIOS
+6.  DATABASE VERIFICATION QUERIES (FOR ALL 13 DATABASES)
+7.  POSTMAN ENVIRONMENT SETUP INSTRUCTIONS
+
+===============================================================================
+1. SYSTEM OVERVIEW, PORTS & PREREQUISITES
+===============================================================================
+
+All API requests can be routed through the unified API Gateway at:
+  http://localhost:8080
+
+Alternatively, you can test each microservice directly on its native port:
+  - API Gateway:               http://localhost:8080
+  - Auth Service:              http://localhost:8081
+  - Guest Service:             http://localhost:8082
+  - Room Service:              http://localhost:8083
+  - Reservation Service:       http://localhost:8084
+  - Payment Service:           http://localhost:8085
+  - Billing Service:           http://localhost:8086
+  - Rate Service:              http://localhost:8087
+  - Staff Service:             http://localhost:8088
+  - Inventory Service:         http://localhost:8089
+  - Guest Experience Service:  http://localhost:8090
+  - Operations Service:        http://localhost:8091
+  - Reporting Service:         http://localhost:8092
+  - Notification Service:      http://localhost:8093
+  - Eureka Server Dashboard:   http://localhost:8761
+  - Config Server:             http://localhost:8888
+  - RabbitMQ Management UI:    http://localhost:15672 (guest / guest)
+  - MySQL Database Host:       localhost:3306 (user: root / password: Bharani13?)
+
+Interactive Swagger UI documentation is available on each service at:
+  http://localhost:<PORT>/swagger-ui.html
+
+===============================================================================
+2. AUTHENTICATION, ROLES & JWT SETUP
+===============================================================================
+
+Every protected endpoint requires the standard HTTP Authorization header:
+  Authorization: Bearer <JWT_TOKEN>
+  Content-Type: application/json
+  X-Correlation-ID: <ANY_UUID_OR_STRING> (Optional, for distributed tracing)
+
+-------------------------------------------------------------------------------
+PRE-SEEDED DEFAULT CREDENTIALS:
+-------------------------------------------------------------------------------
+1. ADMIN:
+   - Username: admin
+   - Password: Admin@123
+   - Role: ROLE_ADMIN
+   - Responsibilities: User creation, account unlocking, user active status.
+
+2. OWNER:
+   - Username: owner
+   - Password: Owner@123
+   - Role: ROLE_OWNER
+   - Responsibilities: Full hotel administration, rates, rooms, categories, reports.
+
+3. MANAGER:
+   - Username: manager
+   - Password: Manager@123
+   - Role: ROLE_MANAGER
+   - Responsibilities: Operations, staff shifts, room assignments, maintenance, breakage.
+
+4. RECEPTIONIST:
+   - Username: receptionist
+   - Password: Reception@123
+   - Role: ROLE_RECEPTIONIST
+   - Responsibilities: Front desk, reservations, check-in, checkout, room transfers.
+
+5. HOUSEKEEPER:
+   - Username: housekeeper
+   - Password: Housekeeper@123
+   - Role: ROLE_HOUSEKEEPER
+   - Responsibilities: Task acceptance, room cleaning, amenity deliveries, damage reporting.
+
+6. GUEST:
+   - Username: guest
+   - Password: Guest@123
+   - Role: ROLE_GUEST
+   - Responsibilities: Self booking, profile management, service requests, feedback, complaints.
+
+-------------------------------------------------------------------------------
+HOW TO OBTAIN JWT TOKEN (STEP 0):
+-------------------------------------------------------------------------------
+Endpoint: POST http://localhost:8080/api/auth/login
+Headers:  Content-Type: application/json
+
+Request Body:
+{
+  "usernameOrEmail": "owner",
+  "password": "Owner@123"
+}
+
+Expected Response (200 OK):
+{
+  "token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvd25lciIsInVzZXJJZCI6Miwicm9sZSI6Ik9XTkVSIiwiaWF0IjoxNzA...",
+  "type": "Bearer",
+  "userId": 2,
+  "username": "owner",
+  "email": "owner@hms.com",
+  "role": "OWNER",
+  "expiresIn": 86400000
+}
+
+* ACTION: Copy the value of "token" and use it in the Authorization header as:
+  Authorization: Bearer eyJhbGciOiJIUzUxMiJ9...
+
+===============================================================================
+3. END-TO-END WORKFLOW TESTING SEQUENCE (MASTER DEMO SCENARIOS)
+===============================================================================
+
+Follow this exact numbered execution order to test the complete lifecycle.
+
+-------------------------------------------------------------------------------
+SCENARIO 1: HOTEL SETUP & MASTER DATA CONFIGURATION
+-------------------------------------------------------------------------------
+Roles: OWNER, MANAGER
+
+Step 1.1: Owner logs in
+  POST http://localhost:8080/api/auth/login
+  Body: {"usernameOrEmail": "owner", "password": "Owner@123"}
+  -> Save OWNER_TOKEN
+
+Step 1.2: Owner creates a new Room Category
+  POST http://localhost:8080/api/room-categories
+  Headers: Authorization: Bearer <OWNER_TOKEN>
+  Body:
+  {
+    "name": "EXECUTIVE_SUITE",
+    "description": "Ultra luxury suite with private terrace and jacuzzi",
+    "basePrice": 350.00,
+    "maxOccupancy": 3
+  }
+  Expected Status: 201 CREATED
+  -> Note "id" (e.g., 5)
+
+Step 1.3: Owner creates an Amenity
+  POST http://localhost:8080/api/amenities
+  Headers: Authorization: Bearer <OWNER_TOKEN>
+  Body:
+  {
+    "name": "Ocean View Balcony",
+    "description": "Private balcony facing the sea",
+    "icon": "sea"
+  }
+  Expected Status: 201 CREATED
+  -> Note "id" (e.g., 5)
+
+Step 1.4: Owner creates a new Room
+  POST http://localhost:8080/api/rooms
+  Headers: Authorization: Bearer <OWNER_TOKEN>
+  Body:
+  {
+    "roomNumber": "401",
+    "categoryId": 5,
+    "resourceType": "ROOM",
+    "floor": 4,
+    "capacity": 3,
+    "pricePerNight": 350.00,
+    "amenityIds": [1, 2, 5]
+  }
+  Expected Status: 201 CREATED
+  -> Note "id" (e.g., 6) and "roomNumber": "401"
+
+Step 1.5: Owner configures Dynamic Pricing Rule for Category 5
+  POST http://localhost:8080/api/rates
+  Headers: Authorization: Bearer <OWNER_TOKEN>
+  Body:
+  {
+    "categoryId": 5,
+    "resourceType": "ROOM",
+    "basePrice": 350.00,
+    "firstNightPrice": 320.00,
+    "extensionPrice": 330.00,
+    "weekendMultiplier": 1.20,
+    "holidayMultiplier": 1.35,
+    "seasonalMultiplier": 1.15,
+    "occupancyThreshold": 70.00,
+    "occupancyMultiplier": 1.25,
+    "active": true
+  }
+  Expected Status: 201 CREATED
+
+Step 1.6: Manager configures Room Range Assignment for Housekeeper
+  POST http://localhost:8080/api/room-assignments
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Body:
+  {
+    "staffId": 3,
+    "startRoomNumber": "100",
+    "endRoomNumber": "500",
+    "effectiveFrom": "2026-01-01",
+    "effectiveTo": "2026-12-31"
+  }
+  Expected Status: 201 CREATED
+  -> Verifies rooms 100-500 are automatically assigned to Housekeeper Helen (staffId 3).
+
+-------------------------------------------------------------------------------
+SCENARIO 2: GUEST REGISTRATION, ROOM SEARCH & DYNAMIC PRICE QUOTE
+-------------------------------------------------------------------------------
+Roles: GUEST, RECEPTIONIST
+
+Step 2.1: Register a new Guest User Account
+  POST http://localhost:8080/api/auth/register
+  Body:
+  {
+    "username": "johndoe",
+    "email": "johndoe@example.com",
+    "password": "Password@123"
+  }
+  Expected Status: 201 CREATED
+
+Step 2.2: Login as the new Guest User
+  POST http://localhost:8080/api/auth/login
+  Body:
+  {
+    "usernameOrEmail": "johndoe",
+    "password": "Password@123"
+  }
+  Expected Status: 200 OK
+  -> Save GUEST_TOKEN and GUEST_USER_ID (e.g., 7)
+
+Step 2.3: Create / Link Guest Profile
+  POST http://localhost:8080/api/guests
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "johndoe@example.com",
+    "phone": "+19876543210",
+    "company": "Acme Corp",
+    "gender": "MALE",
+    "address": "456 Palm Grove Way, CA"
+  }
+  Expected Status: 201 CREATED
+  -> Note "id" (e.g., GUEST_ID = 1) and "memberCode" (e.g., MEM-XXXXXXXX)
+
+Step 2.4: Guest searches available rooms for stay dates
+  GET http://localhost:8080/api/rooms/available?categoryId=5&minCapacity=2&resourceType=ROOM
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Expected Status: 200 OK
+  -> Returns Room 401 with status "AVAILABLE"
+
+Step 2.5: Guest requests Dynamic Pricing Quote
+  POST http://localhost:8080/api/rates/quote
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "categoryId": 5,
+    "resourceType": "ROOM",
+    "checkInDate": "2026-10-10",
+    "checkOutDate": "2026-10-13",
+    "numberOfGuests": 2
+  }
+  Expected Status: 200 OK
+  Expected Response:
+  {
+    "categoryId": 5,
+    "resourceType": "ROOM",
+    "checkInDate": "2026-10-10",
+    "checkOutDate": "2026-10-13",
+    "nights": 3,
+    "numberOfGuests": 2,
+    "basePrice": 350.00,
+    "totalAmount": 1260.00,
+    "appliedMultipliers": {
+      "weekendMultiplier": 1.20,
+      "seasonalMultiplier": 1.15
+    }
+  }
+
+-------------------------------------------------------------------------------
+SCENARIO 3: RESERVATION CREATION, IDEMPOTENT PAYMENT & SAGA CONFIRMATION
+-------------------------------------------------------------------------------
+Roles: GUEST, RECEPTIONIST
+
+Step 3.1: Create Reservation (Enters PENDING State, Holds Room)
+  POST http://localhost:8080/api/reservations
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "guestId": 1,
+    "resourceType": "ROOM",
+    "roomId": 6,
+    "roomCategoryId": 5,
+    "adults": 2,
+    "children": 0,
+    "checkInDateTime": "2026-10-10T14:00:00",
+    "checkOutDateTime": "2026-10-13T11:00:00",
+    "quotedAmount": 1260.00,
+    "specialRequests": "Late check-in requested"
+  }
+  Expected Status: 201 CREATED
+  Expected Response:
+  {
+    "id": 1,
+    "reservationCode": "RES-XXXXXXXX",
+    "guestId": 1,
+    "resourceType": "ROOM",
+    "roomId": 6,
+    "roomCategoryId": 5,
+    "adults": 2,
+    "children": 0,
+    "checkInDateTime": "2026-10-10T14:00:00",
+    "checkOutDateTime": "2026-10-13T11:00:00",
+    "nights": 3,
+    "quotedAmount": 1260.00,
+    "status": "PENDING"
+  }
+  -> Note RESERVATION_ID = 1
+
+Step 3.2: Verify Room State Changed to RESERVED
+  GET http://localhost:8080/api/rooms/6
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Expected Status: 200 OK -> "status": "RESERVED"
+
+Step 3.3: Execute Idempotent Payment
+  POST http://localhost:8080/api/payments
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "reservationId": 1,
+    "amount": 1260.00,
+    "paymentMethod": "CARD",
+    "idempotencyKey": "PAY-IDEM-001-UNIQUE-KEY",
+    "providerReference": "TXN_STRIPE_987654"
+  }
+  Expected Status: 201 CREATED
+  Expected Response:
+  {
+    "id": 1,
+    "reservationId": 1,
+    "amount": 1260.00,
+    "paymentMethod": "CARD",
+    "status": "SUCCESS",
+    "idempotencyKey": "PAY-IDEM-001-UNIQUE-KEY",
+    "providerReference": "TXN_STRIPE_987654"
+  }
+
+Step 3.4: Test Payment Idempotency (Repeat exact same call)
+  POST http://localhost:8080/api/payments
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body: (Same payload as 3.3)
+  Expected Status: 200 OK or 201 CREATED
+  -> Returns existing payment #1 without duplicate debit or duplicate database record.
+
+Step 3.5: Verify Reservation Saga Auto-Confirmed via RabbitMQ Event
+  GET http://localhost:8080/api/reservations/1
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Expected Status: 200 OK -> "status": "CONFIRMED"
+
+Step 3.6: Verify Confirmation Notification Generated
+  GET http://localhost:8080/api/notifications
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Expected Status: 200 OK
+  -> List contains: "Reservation Confirmed: Your reservation #RES-XXXXXXXX has been confirmed!"
+
+-------------------------------------------------------------------------------
+SCENARIO 4: FRONT DESK CHECK-IN & ROOM OCCUPANCY
+-------------------------------------------------------------------------------
+Roles: RECEPTIONIST, MANAGER
+
+Step 4.1: Receptionist logs in
+  POST http://localhost:8080/api/auth/login
+  Body: {"usernameOrEmail": "receptionist", "password": "Reception@123"}
+  -> Save RECEPTIONIST_TOKEN
+
+Step 4.2: Receptionist checks in the guest upon arrival
+  POST http://localhost:8080/api/reservations/1/check-in
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Expected Status: 200 OK
+  Expected Response -> "status": "CHECKED_IN"
+
+Step 4.3: Verify Room Status is now OCCUPIED
+  GET http://localhost:8080/api/rooms/6
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Expected Status: 200 OK -> "status": "OCCUPIED"
+
+-------------------------------------------------------------------------------
+SCENARIO 5: GUEST QR SERVICE REQUEST & HOUSEKEEPING DELIVERY WORKFLOW
+-------------------------------------------------------------------------------
+Roles: GUEST, HOUSEKEEPER, MANAGER
+
+Step 5.1: Guest scans in-room QR code and requests extra towels & toiletries
+  POST http://localhost:8080/api/service-requests
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "guestId": 1,
+    "reservationId": 1,
+    "roomId": 6,
+    "requestType": "EXTRA_TOWELS",
+    "description": "Please deliver 2 extra bath towels and shampoo",
+    "quantity": 2,
+    "priority": "HIGH"
+  }
+  Expected Status: 201 CREATED
+  Expected Response -> "status": "PENDING", "requestCode": "SR-XXXXXXXX"
+  -> Note SERVICE_REQUEST_ID = 1
+
+Step 5.2: Housekeeper logs in
+  POST http://localhost:8080/api/auth/login
+  Body: {"usernameOrEmail": "housekeeper", "password": "Housekeeper@123"}
+  -> Save HOUSEKEEPER_TOKEN
+
+Step 5.3: Housekeeper views assigned tasks
+  GET http://localhost:8080/api/housekeeping/tasks/my
+  Headers: Authorization: Bearer <HOUSEKEEPER_TOKEN>
+  Expected Status: 200 OK
+  -> Returns automatically dispatched task for Room 401 with "status": "ASSIGNED"
+  -> Note TASK_ID = 1
+
+Step 5.4: Housekeeper accepts the task
+  POST http://localhost:8080/api/housekeeping/tasks/1/accept
+  Headers: Authorization: Bearer <HOUSEKEEPER_TOKEN>
+  Expected Status: 200 OK -> "status": "ACCEPTED"
+
+Step 5.5: Housekeeper starts the delivery
+  POST http://localhost:8080/api/housekeeping/tasks/1/start
+  Headers: Authorization: Bearer <HOUSEKEEPER_TOKEN>
+  Expected Status: 200 OK -> "status": "IN_PROGRESS"
+
+Step 5.6: Housekeeper completes delivery
+  POST http://localhost:8080/api/housekeeping/tasks/1/complete
+  Headers: Authorization: Bearer <HOUSEKEEPER_TOKEN>
+  Expected Status: 200 OK -> "status": "COMPLETED"
+
+Step 5.7: Verify Guest Service Request auto-completed
+  GET http://localhost:8080/api/service-requests/1
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Expected Status: 200 OK -> "status": "COMPLETED"
+
+-------------------------------------------------------------------------------
+SCENARIO 6: LATE CHECKOUT REQUEST, BREAKAGE REPORTING & BILLING ADJUSTMENT
+-------------------------------------------------------------------------------
+Roles: GUEST, HOUSEKEEPER, MANAGER
+
+Step 6.1: Guest requests late checkout
+  POST http://localhost:8080/api/reservations/1/late-checkout?newCheckoutTime=2026-10-13T15:00:00
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Expected Status: 200 OK -> Check-out time extended to 15:00:00
+
+Step 6.2: Housekeeper reports accidentally broken glassware in Room 401
+  POST http://localhost:8080/api/breakage
+  Headers: Authorization: Bearer <HOUSEKEEPER_TOKEN>
+  Body:
+  {
+    "roomId": 6,
+    "reservationId": 1,
+    "itemName": "Crystal Whiskey Decanter",
+    "cost": 50.00,
+    "remarks": "Broken by guest during stay"
+  }
+  Expected Status: 201 CREATED -> "status": "REPORTED", "id": 1
+
+Step 6.3: Manager reviews and approves the breakage charge
+  POST http://localhost:8080/api/breakage/1/approve
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK -> "status": "APPROVED"
+  -> RabbitMQ publishes BreakageApproved event to billing-service.
+
+Step 6.4: Verify Bill includes Room Charge + Breakage Charge
+  GET http://localhost:8080/api/bills/reservation/1
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Expected Status: 200 OK
+  Expected Response:
+  {
+    "id": 1,
+    "reservationId": 1,
+    "guestId": 1,
+    "status": "OPEN",
+    "roomCharges": 1260.00,
+    "breakageCharges": 50.00,
+    "totalAmount": 1310.00,
+    "paidAmount": 1260.00,
+    "outstandingAmount": 50.00
+  }
+
+-------------------------------------------------------------------------------
+SCENARIO 7: CHECK-OUT, FINAL BILLING, PAYMENT & ROOM CLEANING LIFECYCLE
+-------------------------------------------------------------------------------
+Roles: RECEPTIONIST, GUEST, HOUSEKEEPER, MANAGER
+
+Step 7.1: Guest pays remaining outstanding balance ($50.00)
+  POST http://localhost:8080/api/payments
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "reservationId": 1,
+    "amount": 50.00,
+    "paymentMethod": "UPI",
+    "idempotencyKey": "PAY-IDEM-002-BREAKAGE",
+    "providerReference": "UPI_REF_334455"
+  }
+  Expected Status: 201 CREATED
+
+Step 7.2: Finalize Bill (Becomes Immutable)
+  POST http://localhost:8080/api/bills/1/finalize
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Expected Status: 200 OK -> "status": "FINALIZED", "outstandingAmount": 0.00
+
+Step 7.3: Front desk executes Guest Check-Out
+  POST http://localhost:8080/api/reservations/1/check-out
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Expected Status: 200 OK -> "status": "CHECKED_OUT"
+
+Step 7.4: Verify Room Automatically Transitioned to DIRTY
+  GET http://localhost:8080/api/rooms/6
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Expected Status: 200 OK -> "status": "DIRTY"
+
+Step 7.5: Verify Housekeeping task CHECKOUT_CLEANING auto-created for Housekeeper
+  GET http://localhost:8080/api/housekeeping/tasks/my
+  Headers: Authorization: Bearer <HOUSEKEEPER_TOKEN>
+  Expected Status: 200 OK -> Task type: "CHECKOUT_CLEANING", Room: 401, "status": "ASSIGNED"
+  -> Note TASK_ID = 2
+
+Step 7.6: Housekeeper accepts and starts cleaning
+  POST http://localhost:8080/api/housekeeping/tasks/2/accept
+  POST http://localhost:8080/api/housekeeping/tasks/2/start
+  Headers: Authorization: Bearer <HOUSEKEEPER_TOKEN>
+  -> Room 401 status automatically becomes "CLEANING".
+
+Step 7.7: Housekeeper finishes cleaning
+  POST http://localhost:8080/api/housekeeping/tasks/2/complete
+  Headers: Authorization: Bearer <HOUSEKEEPER_TOKEN>
+  Expected Status: 200 OK
+  -> Room 401 status automatically becomes "CLEAN".
+
+Step 7.8: Manager or Front Desk verifies room inspection
+  PUT http://localhost:8080/api/rooms/6/status
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Body: {"status": "AVAILABLE"}
+  Expected Status: 200 OK -> "status": "AVAILABLE"
+
+Step 7.9: Get Printable Final Bill
+  GET http://localhost:8080/api/bills/1/print
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Expected Status: 200 OK
+  -> Returns structured printable receipt with all line items, tax, paid, and balance 0.00.
+
+-------------------------------------------------------------------------------
+SCENARIO 8: ROOM WAITLIST & AUTOMATIC AVAILABILITY NOTIFICATION
+-------------------------------------------------------------------------------
+Roles: GUEST, RECEPTIONIST
+
+Step 8.1: Guest joins waitlist when preferred category is fully booked
+  POST http://localhost:8080/api/waitlist
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "guestId": 1,
+    "roomCategoryId": 4,
+    "resourceType": "ROOM",
+    "checkInDate": "2026-11-01",
+    "checkOutDate": "2026-11-05",
+    "priority": 1
+  }
+  Expected Status: 201 CREATED -> "status": "PENDING", "id": 1
+
+Step 8.2: View Waitlist Entries
+  GET http://localhost:8080/api/waitlist
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Expected Status: 200 OK -> Lists pending waitlist entry for Guest 1.
+
+-------------------------------------------------------------------------------
+SCENARIO 9: RESERVATION CANCELLATION, SAGA COMPENSATION & REFUND
+-------------------------------------------------------------------------------
+Roles: GUEST, RECEPTIONIST, OWNER
+
+Step 9.1: Create another reservation to test cancellation
+  POST http://localhost:8080/api/reservations
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "guestId": 1,
+    "resourceType": "ROOM",
+    "roomId": 2,
+    "roomCategoryId": 2,
+    "adults": 2,
+    "children": 0,
+    "checkInDateTime": "2026-12-01T14:00:00",
+    "checkOutDateTime": "2026-12-03T11:00:00",
+    "quotedAmount": 320.00
+  }
+  Expected Status: 201 CREATED -> Note RESERVATION_ID = 2
+
+Step 9.2: Pay for reservation 2
+  POST http://localhost:8080/api/payments
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "reservationId": 2,
+    "amount": 320.00,
+    "paymentMethod": "CARD",
+    "idempotencyKey": "PAY-IDEM-003-CANCEL-TEST",
+    "providerReference": "TXN_STRIPE_998877"
+  }
+  Expected Status: 201 CREATED -> Note PAYMENT_ID = 3
+
+Step 9.3: Cancel the reservation
+  POST http://localhost:8080/api/reservations/2/cancel?reason=Trip%20postponed
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Expected Status: 200 OK -> "status": "CANCELLED"
+
+Step 9.4: Process Refund
+  POST http://localhost:8080/api/payments/3/refund
+  Headers: Authorization: Bearer <OWNER_TOKEN>
+  Body:
+  {
+    "amount": 320.00,
+    "reason": "Customer cancellation within policy"
+  }
+  Expected Status: 200 OK
+  Expected Response -> "status": "REFUNDED", "refundedAmount": 320.00
+
+-------------------------------------------------------------------------------
+SCENARIO 10: INVENTORY STOCK MOVEMENTS & LOW-STOCK ALERTS
+-------------------------------------------------------------------------------
+Roles: MANAGER, OWNER
+
+Step 10.1: Check inventory items
+  GET http://localhost:8080/api/inventory
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK -> Lists seed items (e.g. Bath Towels LIN-TWL-001 with 150 in stock)
+
+Step 10.2: Perform Stock-Out (Consumption)
+  POST http://localhost:8080/api/inventory/1/stock-out?quantity=130&reason=Floor%20distribution
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK
+  -> Stock drops from 150 to 20 (below minimum threshold 30).
+  -> RabbitMQ publishes LowStockDetected event.
+
+Step 10.3: Check Low-Stock items API
+  GET http://localhost:8080/api/inventory/low-stock
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK -> Lists Item #1 (current stock 20 <= min 30).
+
+Step 10.4: Check Notification dispatched for Low Stock
+  GET http://localhost:8080/api/notifications
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK
+  -> Contains: "Low Stock Alert: Item #LIN-TWL-001 current stock (20) is below reorder threshold!"
+
+Step 10.5: Perform Stock-In (Replenishment)
+  POST http://localhost:8080/api/inventory/1/stock-in?quantity=100&reference=PO-99881
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK -> Stock increases to 120.
+
+-------------------------------------------------------------------------------
+SCENARIO 11: MAINTENANCE TICKET LIFECYCLE & ROOM STATUS LOCK
+-------------------------------------------------------------------------------
+Roles: RECEPTIONIST, MANAGER, HOUSEKEEPER
+
+Step 11.1: Report a plumbing issue in Room 101
+  POST http://localhost:8080/api/maintenance
+  Headers: Authorization: Bearer <HOUSEKEEPER_TOKEN>
+  Body:
+  {
+    "roomId": 1,
+    "issueType": "PLUMBING",
+    "description": "Leaking bathroom sink tap",
+    "priority": "HIGH"
+  }
+  Expected Status: 201 CREATED -> "status": "OPEN", "id": 1
+
+Step 11.2: Manager assigns maintenance staff
+  POST http://localhost:8080/api/maintenance/1/assign?assignedStaffId=1
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK -> "status": "ASSIGNED"
+
+Step 11.3: Start maintenance work
+  POST http://localhost:8080/api/maintenance/1/start
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK -> "status": "IN_PROGRESS"
+  -> Room 101 status automatically becomes "MAINTENANCE".
+
+Step 11.4: Resolve maintenance issue
+  POST http://localhost:8080/api/maintenance/1/resolve?resolutionNotes=Replaced%20rubber%20washer%20and%20sealed%20pipe
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK -> "status": "RESOLVED"
+
+Step 11.5: Close ticket after inspection
+  POST http://localhost:8080/api/maintenance/1/close
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK -> "status": "CLOSED"
+  -> Room 101 returns to "AVAILABLE".
+
+-------------------------------------------------------------------------------
+SCENARIO 12: CASH DRAWER SESSION MANAGEMENT & BALANCING
+-------------------------------------------------------------------------------
+Roles: RECEPTIONIST, MANAGER
+
+Step 12.1: Receptionist opens cash drawer at shift start
+  POST http://localhost:8080/api/cash-drawer/open
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Body:
+  {
+    "staffId": 2,
+    "openingCash": 500.00
+  }
+  Expected Status: 201 CREATED -> Note CASH_DRAWER_ID = 1
+
+Step 12.2: Record cash transaction
+  POST http://localhost:8080/api/cash-drawer/1/transaction
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Body:
+  {
+    "transactionType": "CASH_IN",
+    "amount": 250.00,
+    "description": "Walk-in reservation cash payment"
+  }
+  Expected Status: 200 OK
+
+Step 12.3: Reconcile and close cash drawer at shift end
+  POST http://localhost:8080/api/cash-drawer/1/close
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Body:
+  {
+    "actualClosingCash": 750.00
+  }
+  Expected Status: 200 OK
+  Expected Response:
+  {
+    "id": 1,
+    "openingCash": 500.00,
+    "cashReceived": 250.00,
+    "cashPaid": 0.00,
+    "expectedClosingCash": 750.00,
+    "actualClosingCash": 750.00,
+    "discrepancy": 0.00,
+    "status": "CLOSED"
+  }
+
+-------------------------------------------------------------------------------
+SCENARIO 13: SHIFT HANDOVER LOGGING & ACKNOWLEDGMENT
+-------------------------------------------------------------------------------
+Roles: RECEPTIONIST, MANAGER
+
+Step 13.1: Outgoing receptionist creates shift handover notes
+  POST http://localhost:8080/api/shift-handover
+  Headers: Authorization: Bearer <RECEPTIONIST_TOKEN>
+  Body:
+  {
+    "outgoingStaffId": 2,
+    "incomingStaffId": 1,
+    "shift": "MORNING",
+    "pendingTasks": "VIP arrival expected at 18:00 in Room 301. Airport pickup arranged.",
+    "cashSummary": "Cash drawer balanced at $750.00.",
+    "remarks": "All morning checkouts completed."
+  }
+  Expected Status: 201 CREATED -> "status": "PENDING_ACK", "id": 1
+
+Step 13.2: Incoming receptionist acknowledges handover
+  POST http://localhost:8080/api/shift-handover/1/acknowledge
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK -> "status": "ACKNOWLEDGED"
+
+-------------------------------------------------------------------------------
+SCENARIO 14: GUEST STAY FEEDBACK, COMPLAINTS & LOYALTY REWARDS
+-------------------------------------------------------------------------------
+Roles: GUEST, MANAGER
+
+Step 14.1: Guest earns Loyalty Points for stay
+  POST http://localhost:8080/api/loyalty/earn
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "guestId": 1,
+    "points": 150,
+    "description": "Points earned for stay #RES-XXXXXXXX"
+  }
+  Expected Status: 200 OK -> "tier": "SILVER", "totalPoints": 150
+
+Step 14.2: Guest submits Feedback
+  POST http://localhost:8080/api/feedback
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "reservationId": 1,
+    "guestId": 1,
+    "rating": 5,
+    "comments": "Exceptional service and beautiful room!"
+  }
+  Expected Status: 201 CREATED
+
+Step 14.3: Guest submits a Complaint (e.g. WiFi speed)
+  POST http://localhost:8080/api/complaints
+  Headers: Authorization: Bearer <GUEST_TOKEN>
+  Body:
+  {
+    "guestId": 1,
+    "roomId": 6,
+    "subject": "Intermittent WiFi on 4th floor",
+    "description": "WiFi speed dropped below 5 Mbps during video conference"
+  }
+  Expected Status: 201 CREATED -> "status": "OPEN", "id": 1
+
+Step 14.4: Manager resolves Complaint
+  PUT http://localhost:8080/api/complaints/1/status?status=RESOLVED&resolutionNotes=Reset%20access%20point%20on%20floor%204
+  Headers: Authorization: Bearer <MANAGER_TOKEN>
+  Expected Status: 200 OK -> "status": "RESOLVED"
+
+-------------------------------------------------------------------------------
+SCENARIO 15: HOTEL ANALYTICS, SCHEDULED DAILY SUMMARY & NOTIFICATIONS
+-------------------------------------------------------------------------------
+Roles: OWNER, MANAGER, ADMIN
+
+Step 15.1: Owner views Occupancy Analytics Report
+  GET http://localhost:8080/api/reports/occupancy?startDate=2026-10-01&endDate=2026-10-31
+  Headers: Authorization: Bearer <OWNER_TOKEN>
+  Expected Status: 200 OK
+
+Step 15.2: Owner views Revenue Analytics Report
+  GET http://localhost:8080/api/reports/revenue?startDate=2026-10-01&endDate=2026-10-31
+  Headers: Authorization: Bearer <OWNER_TOKEN>
+  Expected Status: 200 OK
+
+Step 15.3: Owner views Staff Performance Report
+  GET http://localhost:8080/api/reports/staff-performance?startDate=2026-10-01&endDate=2026-10-31
+  Headers: Authorization: Bearer <OWNER_TOKEN>
+  Expected Status: 200 OK
+
+Step 15.4: Manually trigger Daily Hotel Summary generation
+  POST http://localhost:8080/api/reports/daily-summary/generate?date=2026-10-10
+  Headers: Authorization: Bearer <OWNER_TOKEN>
+  Expected Status: 200 OK
+  Expected Response:
+  {
+    "summaryDate": "2026-10-10",
+    "totalRevenue": 1310.00,
+    "occupiedRooms": 1,
+    "occupancyPercentage": 20.00,
+    "lowStockItems": 1
+  }
+
+Step 15.5: Retrieve Daily Summary
+  GET http://localhost:8080/api/reports/daily-summary?date=2026-10-10
+  Headers: Authorization: Bearer <OWNER_TOKEN>
+  Expected Status: 200 OK
+
+Step 15.6: Mark Notification as READ
+  PUT http://localhost:8080/api/notifications/1/read
+  Headers: Authorization: Bearer <OWNER_TOKEN>
+  Expected Status: 200 OK -> "status": "READ"
+
+===============================================================================
+4. COMPLETE API ENDPOINT REFERENCE (BY MICROSERVICE MODULE)
+===============================================================================
+
+-------------------------------------------------------------------------------
+MODULE 1: AUTH SERVICE
+Base URL: http://localhost:8080/api
+-------------------------------------------------------------------------------
+
+1.1 POST /api/auth/login
+    - Purpose: Authenticate credentials and receive JWT token.
+    - Security: Public
+    - Request Body:
+      {
+        "usernameOrEmail": "admin",
+        "password": "Admin@123"
+      }
+    - Expected Response: 200 OK -> AuthResponse { token, type, userId, username, email, role, expiresIn }
+
+1.2 POST /api/auth/register
+    - Purpose: Self-registration for guests.
+    - Security: Public
+    - Request Body:
+      {
+        "username": "alexsmith",
+        "email": "alex@hms.com",
+        "password": "Password@123"
+      }
+    - Expected Response: 201 CREATED -> UserResponse { id, username, email, role: "GUEST", active: true }
+
+1.3 POST /api/users
+    - Purpose: Admin/Owner creates internal user account.
+    - Security: ROLE_ADMIN, ROLE_OWNER
+    - Request Body:
+      {
+        "username": "deskagent2",
+        "email": "agent2@hms.com",
+        "password": "Password@123",
+        "role": "RECEPTIONIST"
+      }
+    - Expected Response: 201 CREATED
+
+1.4 GET /api/users
+    - Purpose: List users with optional role filter.
+    - Security: ROLE_ADMIN, ROLE_OWNER, ROLE_MANAGER
+    - Query Params: ?role=RECEPTIONIST (optional)
+    - Expected Response: 200 OK -> List<UserResponse>
+
+1.5 GET /api/users/{id}
+    - Purpose: Retrieve single user profile by ID.
+    - Security: ROLE_ADMIN, ROLE_OWNER, ROLE_MANAGER, or self ownership
+    - Expected Response: 200 OK -> UserResponse
+
+1.6 PUT /api/users/{id}
+    - Purpose: Update user profile.
+    - Security: ROLE_ADMIN, ROLE_OWNER
+    - Request Body:
+      {
+        "email": "updated_email@hms.com",
+        "role": "MANAGER",
+        "active": true
+      }
+    - Expected Response: 200 OK
+
+1.7 DELETE /api/users/{id}
+    - Purpose: Delete user account.
+    - Security: ROLE_ADMIN, ROLE_OWNER
+    - Expected Response: 204 NO CONTENT
+
+1.8 PUT /api/users/{id}/unlock
+    - Purpose: Manually unlock an account locked by failed logins.
+    - Security: ROLE_ADMIN, ROLE_OWNER
+    - Expected Response: 200 OK -> UserResponse { locked: false, failedLoginAttempts: 0 }
+
+1.9 PUT /api/users/{id}/status?active=false
+    - Purpose: Activate or deactivate a user account.
+    - Security: ROLE_ADMIN, ROLE_OWNER
+    - Expected Response: 200 OK -> UserResponse { active: false }
+
+-------------------------------------------------------------------------------
+MODULE 2: GUEST SERVICE
+Base URL: http://localhost:8080/api/guests
+-------------------------------------------------------------------------------
+
+2.1 POST /api/guests
+    - Purpose: Register guest profile. Auto-generates unique member code.
+    - Security: Authenticated
+    - Request Body:
+      {
+        "firstName": "Robert",
+        "lastName": "Johnson",
+        "email": "robert.j@example.com",
+        "phone": "+14155552671",
+        "company": "Tech Global Inc",
+        "gender": "MALE",
+        "address": "789 Market St, San Francisco, CA"
+      }
+    - Expected Response: 201 CREATED -> GuestResponse { id, memberCode, firstName, lastName, ... }
+
+2.2 GET /api/guests
+    - Purpose: List all guests (with optional pagination).
+    - Security: ROLE_OWNER, ROLE_MANAGER, ROLE_RECEPTIONIST
+    - Expected Response: 200 OK -> List<GuestResponse>
+
+2.3 GET /api/guests/{id}
+    - Purpose: Get guest profile by ID.
+    - Security: ROLE_OWNER, ROLE_MANAGER, ROLE_RECEPTIONIST, or guest ownership
+    - Expected Response: 200 OK -> GuestResponse
+
+2.4 PUT /api/guests/{id}
+    - Purpose: Update guest profile.
+    - Security: ROLE_OWNER, ROLE_MANAGER, ROLE_RECEPTIONIST, or guest ownership
+    - Request Body: (Same fields as POST)
+    - Expected Response: 200 OK
+
+2.5 DELETE /api/guests/{id}
+    - Purpose: Delete guest profile.
+    - Security: ROLE_OWNER, ROLE_MANAGER
+    - Expected Response: 204 NO CONTENT
+
+-------------------------------------------------------------------------------
+MODULE 3: ROOM SERVICE
+Base URL: http://localhost:8080/api
+-------------------------------------------------------------------------------
+
+3.1 POST /api/room-categories
+    - Security: ROLE_OWNER, ROLE_MANAGER
+    - Request Body: {"name": "PENTHOUSE", "description": "Top floor luxury", "basePrice": 600.00, "maxOccupancy": 6}
+    - Expected Response: 201 CREATED
+
+3.2 GET /api/room-categories
+    - Security: Public / Authenticated
+    - Expected Response: 200 OK -> List of categories
+
+3.3 POST /api/amenities
+    - Security: ROLE_OWNER, ROLE_MANAGER
+    - Request Body: {"name": "Private Sauna", "description": "In-room infrared sauna", "icon": "fire"}
+    - Expected Response: 201 CREATED
+
+3.4 GET /api/amenities
+    - Security: Public / Authenticated
+    - Expected Response: 200 OK -> List of amenities
+
+3.5 POST /api/rooms
+    - Security: ROLE_OWNER, ROLE_MANAGER
+    - Request Body:
+      {
+        "roomNumber": "501",
+        "categoryId": 4,
+        "resourceType": "ROOM",
+        "floor": 5,
+        "capacity": 4,
+        "pricePerNight": 450.00,
+        "amenityIds": [1, 2, 3, 4]
+      }
+    - Expected Response: 201 CREATED
+
+3.6 GET /api/rooms
+    - Security: Authenticated
+    - Expected Response: 200 OK -> List of all rooms
+
+3.7 GET /api/rooms/{id}
+    - Security: Authenticated
+    - Expected Response: 200 OK -> RoomResponse
+
+3.8 GET /api/rooms/available
+    - Query Params: ?categoryId=1&minCapacity=1&resourceType=ROOM
+    - Expected Response: 200 OK -> List of available rooms
+
+3.9 GET /api/rooms/availability/check
+    - Query Params: ?roomId=1&checkIn=2026-10-10&checkOut=2026-10-13
+    - Expected Response: 200 OK -> true / false
+
+3.10 PUT /api/rooms/{id}/status
+     - Security: ROLE_OWNER, ROLE_MANAGER, ROLE_RECEPTIONIST
+     - Request Body: {"status": "MAINTENANCE"}
+     - Expected Response: 200 OK
+
+-------------------------------------------------------------------------------
+MODULE 4: RATE SERVICE
+Base URL: http://localhost:8080/api/rates
+-------------------------------------------------------------------------------
+
+4.1 POST /api/rates
+    - Purpose: Configure base rates and dynamic multipliers.
+    - Security: ROLE_OWNER, ROLE_MANAGER
+    - Request Body:
+      {
+        "categoryId": 1,
+        "resourceType": "ROOM",
+        "basePrice": 100.00,
+        "firstNightPrice": 90.00,
+        "extensionPrice": 95.00,
+        "weekendMultiplier": 1.15,
+        "holidayMultiplier": 1.25,
+        "seasonalMultiplier": 1.10,
+        "occupancyThreshold": 80.00,
+        "occupancyMultiplier": 1.20,
+        "active": true
+      }
+    - Expected Response: 201 CREATED
+
+4.2 GET /api/rates
+    - Security: Authenticated
+    - Expected Response: 200 OK -> List<RateResponse>
+
+4.3 POST /api/rates/quote
+    - Purpose: Calculate dynamic quote based on dates, guests and multipliers.
+    - Security: Authenticated
+    - Request Body:
+      {
+        "categoryId": 1,
+        "resourceType": "ROOM",
+        "checkInDate": "2026-10-10",
+        "checkOutDate": "2026-10-12",
+        "numberOfGuests": 1
+      }
+    - Expected Response: 200 OK -> Dynamic price quote calculation
+
+-------------------------------------------------------------------------------
+MODULE 5: RESERVATION SERVICE
+Base URL: http://localhost:8080/api
+-------------------------------------------------------------------------------
+
+5.1 POST /api/reservations
+    - Purpose: Create room or hall reservation.
+    - Security: Authenticated
+    - Request Body:
+      {
+        "guestId": 1,
+        "resourceType": "ROOM",
+        "roomId": 1,
+        "roomCategoryId": 1,
+        "adults": 1,
+        "children": 0,
+        "checkInDateTime": "2026-11-10T14:00:00",
+        "checkOutDateTime": "2026-11-12T11:00:00",
+        "quotedAmount": 200.00,
+        "specialRequests": "Quiet floor preferred"
+      }
+    - Expected Response: 201 CREATED -> ReservationResponse { status: "PENDING" }
+
+5.2 GET /api/reservations/{id}
+    - Security: Authenticated (ownership check for guests)
+    - Expected Response: 200 OK
+
+5.3 POST /api/reservations/{id}/check-in
+    - Security: ROLE_RECEPTIONIST, ROLE_MANAGER, ROLE_OWNER
+    - Expected Response: 200 OK -> status: "CHECKED_IN"
+
+5.4 POST /api/reservations/{id}/check-out
+    - Security: ROLE_RECEPTIONIST, ROLE_MANAGER, ROLE_OWNER
+    - Expected Response: 200 OK -> status: "CHECKED_OUT"
+
+5.5 POST /api/reservations/{id}/cancel?reason=Trip%20cancelled
+    - Security: Authenticated (guest own or staff)
+    - Expected Response: 200 OK -> status: "CANCELLED"
+
+5.6 POST /api/reservations/{id}/no-show
+    - Security: ROLE_RECEPTIONIST, ROLE_MANAGER, ROLE_OWNER
+    - Expected Response: 200 OK -> status: "NO_SHOW"
+
+5.7 POST /api/reservations/{id}/room-transfer?newRoomId=2
+    - Security: ROLE_RECEPTIONIST, ROLE_MANAGER, ROLE_OWNER
+    - Expected Response: 200 OK -> Transfers stay to Room 2
+
+5.8 POST /api/reservations/{id}/room-upgrade?newCategoryId=3
+    - Security: ROLE_RECEPTIONIST, ROLE_MANAGER, ROLE_OWNER
+    - Expected Response: 200 OK -> Upgrades reservation to Deluxe
+
+5.9 POST /api/reservations/{id}/room-downgrade?newCategoryId=1
+    - Security: ROLE_RECEPTIONIST, ROLE_MANAGER, ROLE_OWNER
+    - Expected Response: 200 OK
+
+5.10 POST /api/reservations/{id}/early-check-in?earlyCheckInTime=2026-11-10T09:00:00
+     - Security: ROLE_RECEPTIONIST, ROLE_MANAGER, ROLE_OWNER
+     - Expected Response: 200 OK
+
+5.11 POST /api/reservations/{id}/late-checkout?newCheckoutTime=2026-11-12T16:00:00
+     - Security: Authenticated
+     - Expected Response: 200 OK
+
+5.12 POST /api/waitlist
+     - Request Body: {"guestId": 1, "roomCategoryId": 3, "resourceType": "ROOM", "checkInDate": "2026-11-10", "checkOutDate": "2026-11-12", "priority": 1}
+     - Expected Response: 201 CREATED
+
+5.13 GET /api/waitlist
+     - Expected Response: 200 OK -> List of waitlist entries
+
+-------------------------------------------------------------------------------
+MODULE 6: PAYMENT SERVICE
+Base URL: http://localhost:8080/api/payments
+-------------------------------------------------------------------------------
+
+6.1 POST /api/payments
+    - Purpose: Process idempotent payment.
+    - Security: Authenticated
+    - Request Body:
+      {
+        "reservationId": 1,
+        "amount": 200.00,
+        "paymentMethod": "CARD",
+        "idempotencyKey": "PAY-KEY-12345",
+        "providerReference": "STRIPE_CH_123"
+      }
+    - Expected Response: 201 CREATED -> PaymentResponse { status: "SUCCESS" }
+
+6.2 GET /api/payments/{id}
+    - Expected Response: 200 OK
+
+6.3 GET /api/payments/reservation/{reservationId}
+    - Expected Response: 200 OK -> List of payments for the reservation
+
+6.4 POST /api/payments/{id}/refund
+    - Security: ROLE_ADMIN, ROLE_OWNER, ROLE_MANAGER
+    - Request Body: {"amount": 200.00, "reason": "Guest cancellation"}
+    - Expected Response: 200 OK -> PaymentResponse { status: "REFUNDED" }
+
+-------------------------------------------------------------------------------
+MODULE 7: BILLING SERVICE
+Base URL: http://localhost:8080/api/bills
+-------------------------------------------------------------------------------
+
+7.1 POST /api/bills
+    - Purpose: Create bill for reservation.
+    - Security: Authenticated
+    - Request Body:
+      {
+        "reservationId": 1,
+        "guestId": 1,
+        "roomCharges": 200.00,
+        "taxRate": 10.00,
+        "discountAmount": 0.00
+      }
+    - Expected Response: 201 CREATED
+
+7.2 GET /api/bills/{id}
+    - Expected Response: 200 OK -> BillResponse
+
+7.3 GET /api/bills/reservation/{reservationId}
+    - Expected Response: 200 OK -> BillResponse
+
+7.4 POST /api/bills/{id}/items
+    - Purpose: Add line item charge (e.g. minibar or room service).
+    - Request Body: {"itemType": "ROOM_SERVICE", "description": "Club Sandwich & Soda", "amount": 25.00, "quantity": 1}
+    - Expected Response: 200 OK
+
+7.5 POST /api/bills/{id}/calculate
+    - Purpose: Deterministically recalculate subtotal, taxes, discounts, and total.
+    - Expected Response: 200 OK
+
+7.6 POST /api/bills/{id}/finalize
+    - Purpose: Finalize and lock bill against modifications.
+    - Security: ROLE_RECEPTIONIST, ROLE_MANAGER, ROLE_OWNER
+    - Expected Response: 200 OK -> status: "FINALIZED"
+
+7.7 GET /api/bills/{id}/print
+    - Purpose: Printable structured receipt representation.
+    - Expected Response: 200 OK -> PrintBillResponse
+
+-------------------------------------------------------------------------------
+MODULE 8: STAFF SERVICE
+Base URL: http://localhost:8080/api
+-------------------------------------------------------------------------------
+
+8.1 POST /api/staff
+    - Purpose: Register staff member.
+    - Security: ROLE_OWNER, ROLE_MANAGER
+    - Request Body:
+      {
+        "userId": 6,
+        "employeeCode": "HK003",
+        "fullName": "Sarah Clean",
+        "address": "123 Maid St",
+        "nic": "NIC1998005",
+        "salary": 2300.00,
+        "age": 25,
+        "occupation": "Housekeeper",
+        "email": "sarah.hk@hms.com",
+        "phone": "+1234567895",
+        "role": "HOUSEKEEPER"
+      }
+    - Expected Response: 201 CREATED
+
+8.2 GET /api/staff
+    - Security: ROLE_OWNER, ROLE_MANAGER
+    - Expected Response: 200 OK -> List<StaffResponse> (Sensitive salary masked for non-owners)
+
+8.3 POST /api/attendance
+    - Purpose: Staff clock-in or clock-out.
+    - Security: Authenticated
+    - Request Body:
+      {
+        "staffId": 3,
+        "date": "2026-10-10",
+        "checkInTime": "07:00:00",
+        "status": "PRESENT"
+      }
+    - Expected Response: 201 CREATED
+
+8.4 GET /api/attendance/staff/{staffId}
+    - Expected Response: 200 OK -> List of attendance records
+
+8.5 POST /api/shifts
+    - Security: ROLE_OWNER, ROLE_MANAGER
+    - Request Body: {"name": "MORNING", "startTime": "07:00:00", "endTime": "15:30:00", "assignedStaffIds": [1, 2, 3]}
+    - Expected Response: 201 CREATED
+
+8.6 POST /api/leave
+    - Request Body: {"staffId": 3, "startDate": "2026-11-01", "endDate": "2026-11-03", "reason": "Family function"}
+    - Expected Response: 201 CREATED
+
+8.7 PUT /api/leave/{id}?status=APPROVED
+    - Security: ROLE_MANAGER, ROLE_OWNER
+    - Expected Response: 200 OK
+
+-------------------------------------------------------------------------------
+MODULE 9: INVENTORY SERVICE
+Base URL: http://localhost:8080/api/inventory
+-------------------------------------------------------------------------------
+
+9.1 POST /api/inventory
+    - Security: ROLE_OWNER, ROLE_MANAGER
+    - Request Body:
+      {
+        "itemCode": "TOI-SOAP-001",
+        "name": "Lavender Soap Bar",
+        "category": "TOILETRIES",
+        "unit": "PIECES",
+        "quantityInStock": 500,
+        "minimumThreshold": 50,
+        "unitCost": 0.80,
+        "description": "Guest bathroom lavender soap"
+      }
+    - Expected Response: 201 CREATED
+
+9.2 GET /api/inventory
+    - Expected Response: 200 OK -> List<InventoryItemResponse>
+
+9.3 POST /api/inventory/{id}/stock-in?quantity=50&reference=PO-1122
+    - Expected Response: 200 OK -> Increases stock
+
+9.4 POST /api/inventory/{id}/stock-out?quantity=20&reason=Issued%20to%20Housekeeping
+    - Expected Response: 200 OK -> Decreases stock
+
+9.5 POST /api/inventory/{id}/adjust?newQuantity=450&reason=Monthly%20Audit
+    - Expected Response: 200 OK -> Adjusts stock
+
+9.6 GET /api/inventory/{id}/movements
+    - Expected Response: 200 OK -> List of historical stock movements
+
+9.7 GET /api/inventory/low-stock
+    - Expected Response: 200 OK -> List of items below minimum threshold
+
+-------------------------------------------------------------------------------
+MODULE 10: OPERATIONS SERVICE
+Base URL: http://localhost:8080/api
+-------------------------------------------------------------------------------
+
+10.1 POST /api/room-assignments
+     - Security: ROLE_MANAGER, ROLE_OWNER
+     - Request Body: {"staffId": 3, "startRoomNumber": "100", "endRoomNumber": "300", "effectiveFrom": "2026-01-01", "effectiveTo": "2026-12-31"}
+     - Expected Response: 201 CREATED
+
+10.2 GET /api/housekeeping/tasks/my
+     - Security: ROLE_HOUSEKEEPER
+     - Expected Response: 200 OK -> List of tasks assigned to authenticated housekeeper
+
+10.3 POST /api/housekeeping/tasks/{id}/accept
+     - Expected Response: 200 OK -> status: "ACCEPTED"
+
+10.4 POST /api/housekeeping/tasks/{id}/start
+     - Expected Response: 200 OK -> status: "IN_PROGRESS"
+
+10.5 POST /api/housekeeping/tasks/{id}/complete
+     - Expected Response: 200 OK -> status: "COMPLETED"
+
+10.6 POST /api/housekeeping/tasks/{id}/reject?reason=Staff%20unavailable
+     - Expected Response: 200 OK -> status: "REJECTED"
+
+10.7 POST /api/maintenance
+     - Request Body: {"roomId": 2, "issueType": "ELECTRICAL", "description": "AC unit not cooling", "priority": "HIGH"}
+     - Expected Response: 201 CREATED
+
+10.8 POST /api/breakage
+     - Request Body: {"roomId": 2, "reservationId": 1, "itemName": "TV Remote Control", "cost": 30.00, "remarks": "Cracked casing"}
+     - Expected Response: 201 CREATED
+
+10.9 POST /api/breakage/{id}/approve
+     - Security: ROLE_MANAGER, ROLE_OWNER
+     - Expected Response: 200 OK
+
+10.10 POST /api/expenses
+      - Request Body: {"category": "MAINTENANCE", "amount": 150.00, "description": "Replaced hallway lighting", "expenseDate": "2026-10-10"}
+      - Expected Response: 201 CREATED
+
+10.11 POST /api/utilities
+      - Request Body: {"utilityType": "ELECTRICITY", "billingPeriod": "2026-09", "unitsConsumed": 4500.0, "totalCost": 900.00}
+      - Expected Response: 201 CREATED
+
+10.12 POST /api/cash-drawer/open
+      - Request Body: {"staffId": 2, "openingCash": 500.00}
+      - Expected Response: 201 CREATED
+
+10.13 POST /api/cash-drawer/{id}/close
+      - Request Body: {"actualClosingCash": 500.00}
+      - Expected Response: 200 OK
+
+10.14 POST /api/shift-handover
+      - Request Body: {"outgoingStaffId": 2, "incomingStaffId": 1, "shift": "MORNING", "pendingTasks": "None", "cashSummary": "Balanced"}
+      - Expected Response: 201 CREATED
+
+-------------------------------------------------------------------------------
+MODULE 11: GUEST EXPERIENCE SERVICE
+Base URL: http://localhost:8080/api
+-------------------------------------------------------------------------------
+
+11.1 POST /api/service-requests
+     - Purpose: Guest service requests / QR room service orders.
+     - Security: Authenticated
+     - Request Body:
+       {
+         "reservationId": 1,
+         "roomId": 1,
+         "requestType": "ROOM_CLEANING",
+         "description": "Please clean room and make bed",
+         "quantity": 1,
+         "priority": "MEDIUM"
+       }
+     - Expected Response: 201 CREATED -> ServiceRequestResponse { status: "PENDING" }
+
+11.2 GET /api/service-requests/{id}
+     - Expected Response: 200 OK
+
+11.3 POST /api/feedback
+     - Request Body: {"reservationId": 1, "guestId": 1, "rating": 5, "comments": "Great breakfast buffet"}
+     - Expected Response: 201 CREATED
+
+11.4 POST /api/complaints
+     - Request Body: {"guestId": 1, "roomId": 1, "subject": "Noisy neighbors", "description": "Loud music next door"}
+     - Expected Response: 201 CREATED
+
+11.5 PUT /api/complaints/{id}/status?status=RESOLVED&resolutionNotes=Spoke%20with%20guests
+     - Security: ROLE_MANAGER, ROLE_OWNER
+     - Expected Response: 200 OK
+
+11.6 GET /api/loyalty/account?guestId=1
+     - Expected Response: 200 OK -> LoyaltyAccountResponse { tier: "SILVER", totalPoints: 150 }
+
+11.7 POST /api/loyalty/redeem
+     - Request Body: {"guestId": 1, "points": 50, "description": "Free breakfast redemption"}
+     - Expected Response: 200 OK -> Points balance updated
+
+-------------------------------------------------------------------------------
+MODULE 12: REPORTING SERVICE
+Base URL: http://localhost:8080/api/reports
+-------------------------------------------------------------------------------
+
+12.1 GET /api/reports/occupancy?startDate=2026-10-01&endDate=2026-10-31
+     - Security: ROLE_OWNER, ROLE_MANAGER, ROLE_ADMIN
+     - Expected Response: 200 OK -> OccupancyReportResponse { totalRooms, occupiedRooms, occupancyPercentage }
+
+12.2 GET /api/reports/revenue?startDate=2026-10-01&endDate=2026-10-31
+     - Security: ROLE_OWNER, ROLE_MANAGER, ROLE_ADMIN
+     - Expected Response: 200 OK -> RevenueReportResponse { roomRevenue, hallRevenue, serviceRevenue, totalRevenue }
+
+12.3 GET /api/reports/expenses?startDate=2026-10-01&endDate=2026-10-31
+     - Security: ROLE_OWNER, ROLE_MANAGER, ROLE_ADMIN
+     - Expected Response: 200 OK -> ExpenseReportResponse
+
+12.4 GET /api/reports/staff-performance?startDate=2026-10-01&endDate=2026-10-31
+     - Security: ROLE_OWNER, ROLE_MANAGER, ROLE_ADMIN
+     - Expected Response: 200 OK -> StaffPerformanceReportResponse
+
+12.5 GET /api/reports/daily-summary?date=2026-10-10
+     - Security: ROLE_OWNER, ROLE_MANAGER, ROLE_ADMIN
+     - Expected Response: 200 OK -> DailySummaryResponse
+
+12.6 POST /api/reports/daily-summary/generate?date=2026-10-10
+     - Security: ROLE_OWNER, ROLE_MANAGER, ROLE_ADMIN
+     - Expected Response: 200 OK -> Generates & returns summary for date
+
+-------------------------------------------------------------------------------
+MODULE 13: NOTIFICATION SERVICE
+Base URL: http://localhost:8080/api/notifications
+-------------------------------------------------------------------------------
+
+13.1 GET /api/notifications?page=0&size=20
+     - Purpose: Get notifications for authenticated user/role.
+     - Security: Authenticated
+     - Expected Response: 200 OK -> Paginated list of notifications
+
+13.2 GET /api/notifications/{id}
+     - Expected Response: 200 OK -> NotificationResponse
+
+13.3 PUT /api/notifications/{id}/read
+     - Expected Response: 200 OK -> status: "READ"
+
+===============================================================================
+5. NEGATIVE, VALIDATION & SECURITY TEST SCENARIOS
+===============================================================================
+
+Test each of the following failure scenarios to verify error handling:
+
+Test N1: Invalid Login Credentials
+  - Call: POST /api/auth/login with {"usernameOrEmail": "admin", "password": "WrongPassword"}
+  - Expected: 401 UNAUTHORIZED -> {"status": 401, "error": "UNAUTHORIZED", "message": "Invalid username/email or password"}
+
+Test N2: Account Lockout after 5 Failed Attempts
+  - Call: POST /api/auth/login 5 consecutive times with bad password for "guest"
+  - Expected: 403 FORBIDDEN / 423 LOCKED -> "Account has been locked due to 5 consecutive failed login attempts."
+  - Verification: Check auth_db `users` table: `locked = 1`. Check notification_db: `AccountLocked` alert logged.
+
+Test N3: Object Ownership Violation (Guest accessing another Guest's data)
+  - Call: GET /api/reservations/999 with Guest 1 token when reservation belongs to Guest 2
+  - Expected: 403 FORBIDDEN -> "Access denied"
+
+Test N4: Unauthorized Role Access (Guest attempting to create Room Category)
+  - Call: POST /api/room-categories with GUEST_TOKEN
+  - Expected: 403 FORBIDDEN
+
+Test N5: Double Booking Prevention
+  - Call: POST /api/reservations for Room 1 with overlapping dates ("2026-11-10" to "2026-11-12") while already booked
+  - Expected: 409 CONFLICT or 400 BAD REQUEST -> "Room is not available for the requested dates"
+
+Test N6: Invalid Room State Transition (Housekeeper trying to mark CLEAN -> AVAILABLE)
+  - Call: PUT /api/rooms/1/status with HOUSEKEEPER_TOKEN and {"status": "AVAILABLE"}
+  - Expected: 403 FORBIDDEN -> "Housekeepers cannot directly mark rooms as AVAILABLE. Room verification required by Manager or Front Desk."
+
+Test N7: Finalized Bill Modification Prevention
+  - Call: POST /api/bills/1/items on a finalized bill
+  - Expected: 400 BAD REQUEST -> "Cannot add items to finalized bill"
+
+Test N8: Excessive Refund Rejection
+  - Call: POST /api/payments/1/refund with amount 5000.00 on a $200 payment
+  - Expected: 400 BAD REQUEST -> "Refund amount exceeds remaining refundable balance"
+
+Test N9: Expired / Missing JWT Token
+  - Call: GET /api/rooms with missing or malformed Authorization header
+  - Expected: 401 UNAUTHORIZED
+
+===============================================================================
+6. DATABASE VERIFICATION QUERIES (FOR ALL 13 DATABASES)
+===============================================================================
+
+Connect to MySQL (`mysql -u root -pBharani13?`):
+
+1. auth_db:
+   USE auth_db;
+   SELECT id, username, email, role, active, locked, failed_login_attempts FROM users;
+
+2. guest_db:
+   USE guest_db;
+   SELECT id, member_code, first_name, last_name, email, phone FROM guests;
+
+3. room_db:
+   USE room_db;
+   SELECT id, room_number, category_id, status, price_per_night FROM rooms;
+   SELECT * FROM room_categories;
+   SELECT * FROM amenities;
+
+4. reservation_db:
+   USE reservation_db;
+   SELECT id, reservation_code, guest_id, room_id, status, quoted_amount, check_in_date_time, check_out_date_time FROM reservations;
+   SELECT * FROM waitlist_entries;
+
+5. payment_db:
+   USE payment_db;
+   SELECT id, reservation_id, amount, payment_method, status, idempotency_key FROM payments;
+   SELECT * FROM refunds;
+
+6. billing_db:
+   USE billing_db;
+   SELECT id, reservation_id, guest_id, status, total_amount, paid_amount, outstanding_amount FROM bills;
+   SELECT * FROM bill_items;
+
+7. rate_db:
+   USE rate_db;
+   SELECT * FROM rates;
+
+8. staff_db:
+   USE staff_db;
+   SELECT id, employee_code, full_name, role, active FROM staff_members;
+   SELECT * FROM shifts;
+   SELECT * FROM attendance_records;
+
+9. inventory_db:
+   USE inventory_db;
+   SELECT id, item_code, name, quantity_in_stock, minimum_threshold, unit_cost FROM inventory_items;
+   SELECT * FROM stock_movements;
+
+10. guest_experience_db:
+    USE guest_experience_db;
+    SELECT id, request_code, reservation_id, request_type, status FROM service_requests;
+    SELECT * FROM feedback;
+    SELECT * FROM complaints;
+    SELECT * FROM loyalty_accounts;
+
+11. operations_db:
+    USE operations_db;
+    SELECT id, task_code, room_id, task_type, assigned_staff_id, status FROM housekeeping_tasks;
+    SELECT * FROM room_assignments;
+    SELECT * FROM maintenance_issues;
+    SELECT * FROM breakage_records;
+    SELECT * FROM cash_drawer_sessions;
+    SELECT * FROM shift_handovers;
+
+12. reporting_db:
+    USE reporting_db;
+    SELECT * FROM daily_summaries;
+    SELECT * FROM revenue_records;
+    SELECT * FROM staff_performance_records;
+
+13. notification_db:
+    USE notification_db;
+    SELECT id, recipient, recipient_role, title, channel, status, created_at FROM notifications ORDER BY id DESC;
+
+===============================================================================
+7. POSTMAN ENVIRONMENT SETUP INSTRUCTIONS
+===============================================================================
+
+1. Create a new Postman Environment named "HMS-Local".
+2. Add the following Environment Variables:
+   - baseUrl:               http://localhost:8080
+   - adminToken:            (Leave empty, populated after Step 0 login)
+   - ownerToken:            (Leave empty)
+   - managerToken:          (Leave empty)
+   - receptionistToken:     (Leave empty)
+   - housekeeperToken:      (Leave empty)
+   - guestToken:            (Leave empty)
+   - guestId:               1
+   - roomId:                1
+   - reservationId:         1
+   - billId:                1
+   - paymentId:             1
+   - taskId:                1
+
+3. In Postman, under the Tests tab of "POST /api/auth/login", add this script to auto-save tokens:
+   var jsonData = pm.response.json();
+   if (jsonData.token) {
+       var role = jsonData.role.toLowerCase();
+       pm.environment.set(role + "Token", jsonData.token);
+       console.log("Saved " + role + "Token: " + jsonData.token);
+   }
+
+===============================================================================
+END OF MANUAL TESTING GUIDE
+===============================================================================

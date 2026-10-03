@@ -1,0 +1,6332 @@
+=======================================================================
+FINAL MASTER PROMPT
+ONLINE HOTEL MANAGEMENT SYSTEM (HMS)
+i-TRANSFORM HOTEL MANAGEMENT SYSTEM
+COMPLETE ANALYSIS + IMPLEMENTATION + ENHANCEMENT + TESTING
+=======================================================================
+
+
+ROLE
+=======================================================================
+
+Act as a senior software architect, senior Java 21 developer, Spring
+Boot 4 microservices developer, database architect, distributed-systems
+engineer, security engineer, testing engineer, and DevOps engineer.
+
+You are responsible for taking the existing Hotel Management System
+(HMS) project available in this workspace and completing it into a
+fully functional, secure, maintainable, tested, and runnable
+microservices-based Hotel Management System.
+
+This is an individual project.
+
+Do NOT design the implementation around multiple developers, team
+branches, team ownership, pull requests, teammate responsibilities,
+or team work splitting.
+
+The goal is one complete project that can be understood, built, tested,
+run, demonstrated, and maintained by one developer.
+
+IMPORTANT:
+
+Do not blindly rewrite the existing project.
+
+First inspect the complete existing codebase.
+
+Understand what already exists.
+
+Identify:
+
+- implemented functionality
+- partially implemented functionality
+- incorrect functionality
+- missing functionality
+- duplicate functionality
+- architecture violations
+- database problems
+- API problems
+- security problems
+- communication problems
+- RabbitMQ problems
+- OpenFeign problems
+- testing gaps
+- configuration problems
+- Docker problems
+- Swagger/documentation gaps
+
+Then improve the existing project carefully.
+
+Preserve valid working functionality.
+
+Refactor only where necessary.
+
+Implement all missing functionality defined in this prompt.
+
+Do not claim functionality is implemented unless the actual code,
+configuration, persistence, integration, and tests exist.
+
+The final result must be a WORKING HMS, not a collection of skeleton
+classes.
+
+
+=======================================================================
+1. SOURCE REQUIREMENTS
+=======================================================================
+
+The original HMS/i-Transform requirements include the following
+business capabilities:
+
+- Make reservations
+- Search rooms
+- Add payments
+- Issue bills
+- Manage guests
+- Manage rooms
+- Manage staff
+- Manage inventory
+- Set rates
+- Retrieve reports
+- Manage users
+- Email/notification functionality
+- Room reservations
+- Hall reservations
+- Room services
+- Guest details
+- Administration
+- Housekeeping
+- Inventory alerts
+- Feedback
+- Complaints
+- Loyalty
+- Multiple payments
+- Refunds
+- Attendance
+- Shifts
+- Dynamic pricing
+- Checkout
+- Maintenance
+- Breakage
+- QR room service
+- No-show
+- Expenses
+- Room transfer
+- Waiting list
+- Early checkout
+- Late checkout
+- Room upgrade
+- Room downgrade
+- Special requests
+- Cash drawer
+- Shift handover
+- Utilities
+- Automated daily summary
+
+The original functional requirements specifically include reservation
+input such as:
+
+- reservation code
+- number of children
+- number of adults
+- check-in date
+- check-out date
+- status
+- number of nights
+
+Guest information includes:
+
+- member code
+- phone number
+- company
+- name
+- email
+- gender
+- address
+
+Staff information includes:
+
+- employee code
+- employee name
+- employee address
+- NIC
+- salary
+- age
+- occupation
+- email
+
+Room search includes:
+
+- period
+- check-in
+- check-out
+- guest count
+
+Payment requirements include:
+
+- total
+- payment time
+- payment details
+
+Billing includes:
+
+- billing number
+- quantity
+- price
+- taxes
+- date
+- services
+- unit
+
+Rate configuration includes:
+
+- check-in
+- check-out
+- day
+- number of guests
+- first-night price
+- extension price
+
+The original system was designed around Owner, Manager, and Receptionist,
+but this project is enhanced to include:
+
+- ADMIN
+- OWNER
+- MANAGER
+- RECEPTIONIST
+- HOUSEKEEPER
+- GUEST
+
+Preserve the original business intent while implementing the enhanced
+architecture described below.
+
+
+=======================================================================
+2. ABSOLUTELY APPROVED TECHNOLOGY STACK
+=======================================================================
+
+Use ONLY the following technologies unless explicitly approved later.
+
+Programming:
+
+- Java 21
+
+Framework:
+
+- Spring Boot 4
+- Spring Cloud
+
+Persistence:
+
+- Spring Data JPA
+- Hibernate
+- MySQL
+
+Microservice infrastructure:
+
+- Spring Cloud Config Server
+- Eureka Server
+- Spring Cloud Gateway
+
+Security:
+
+- Spring Security
+- JWT
+
+Synchronous service communication:
+
+- REST
+- Spring Cloud OpenFeign
+
+Asynchronous communication:
+
+- RabbitMQ
+- Spring AMQP
+
+Fault tolerance:
+
+- Resilience4j
+
+Use:
+
+- CircuitBreaker
+- Retry
+- TimeLimiter
+- Bulkhead
+- Fallback
+
+Validation:
+
+- Jakarta Validation
+
+Logging:
+
+- SLF4J
+- Logback
+
+Monitoring:
+
+- Spring Boot Actuator
+
+Testing:
+
+- JUnit 5
+- Mockito
+- Spring Boot Test
+- MockMvc/WebTestClient where appropriate
+
+API documentation:
+
+- Swagger/OpenAPI ONLY
+
+Containerization:
+
+- Docker
+- Docker Compose
+
+Code simplification:
+
+- Lombok
+
+
+=======================================================================
+3. FORBIDDEN TECHNOLOGIES
+=======================================================================
+
+Do NOT introduce any of these technologies unless I explicitly approve
+them:
+
+- Kafka
+- Redis
+- MongoDB
+- PostgreSQL
+- Kubernetes
+- MapStruct
+- Flyway
+- Liquibase
+- Elasticsearch
+- Prometheus
+- Grafana
+- Postman
+- another API documentation framework
+- another message broker
+- another database
+- another HTTP client
+- separate housekeeping-service
+- separate email-service
+- separate sms-service
+- unnecessary third-party frameworks
+
+IMPORTANT:
+
+The original source document mentions Flyway or equivalent migration
+tools.
+
+Do NOT add Flyway or Liquibase because they are NOT part of the
+currently approved technology stack.
+
+Use MySQL schema initialization/manual SQL/configuration as appropriate
+within the approved stack unless migration technology is explicitly
+approved later.
+
+The original source also mentions Postman.
+
+Do NOT implement Postman because the final project uses Swagger/OpenAPI
+only.
+
+The original source mentions email-service and sms-service.
+
+Do NOT create separate email-service or sms-service.
+
+Use notification-service for notification coordination and notification
+records. If actual external delivery is not configured, implement the
+notification workflow in a way that can safely record/simulate the
+notification without inventing another technology.
+
+
+=======================================================================
+4. FINAL MICROSERVICE ARCHITECTURE
+=======================================================================
+
+The final architecture contains EXACTLY 16 services.
+
+INFRASTRUCTURE SERVICES:
+
+1. config-server
+2. eureka-server
+3. api-gateway
+
+BUSINESS SERVICES:
+
+4. auth-service
+5. guest-service
+6. room-service
+7. reservation-service
+8. payment-service
+9. billing-service
+10. rate-service
+11. staff-service
+12. inventory-service
+13. guest-experience-service
+14. operations-service
+15. reporting-service
+16. notification-service
+
+Do NOT create additional microservices.
+
+In particular:
+
+DO NOT create:
+
+housekeeping-service
+email-service
+sms-service
+restaurant-service
+maintenance-service
+reporting-database-service
+pricing-service
+
+The functionality of these concepts belongs to the existing services
+as defined below.
+
+
+=======================================================================
+5. SERVICE OWNERSHIP
+=======================================================================
+
+------------------------------------------------------------
+CONFIG SERVER
+------------------------------------------------------------
+
+Owns centralized configuration.
+
+No hotel business database.
+
+------------------------------------------------------------
+EUREKA SERVER
+------------------------------------------------------------
+
+Owns service discovery.
+
+No hotel business database.
+
+------------------------------------------------------------
+API GATEWAY
+------------------------------------------------------------
+
+Owns:
+
+- external routing
+- JWT gateway filtering
+- correlation ID propagation
+- gateway-level concerns
+
+No business database.
+
+------------------------------------------------------------
+AUTH SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- users
+- roles
+- login
+- password handling
+- account lock
+- JWT issuance
+
+Database:
+
+auth_db
+
+------------------------------------------------------------
+GUEST SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- guest/member profile
+- contact information
+- guest CRUD
+
+Database:
+
+guest_db
+
+------------------------------------------------------------
+ROOM SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- rooms
+- room categories
+- room types
+- amenities
+- room status
+- room availability
+- room operational state
+- bookable hotel halls if hall-reservation functionality is retained
+
+Database:
+
+room_db
+
+IMPORTANT:
+
+Hall reservation is part of the original HMS scope.
+
+Do not create a hall-service.
+
+Represent halls as bookable resources owned by room-service or an
+appropriate resource model inside room-service, and reserve them through
+reservation-service.
+
+------------------------------------------------------------
+RESERVATION SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- room reservations
+- hall reservations
+- reservation lifecycle
+- room allocation
+- cancellation
+- modification
+- no-show
+- waiting list
+- early check-in
+- late checkout
+- room transfer
+- room upgrade
+- room downgrade
+
+Database:
+
+reservation_db
+
+------------------------------------------------------------
+PAYMENT SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- payment records
+- payment status
+- payment methods
+- refunds
+- payment idempotency
+
+Database:
+
+payment_db
+
+------------------------------------------------------------
+BILLING SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- bills
+- invoices
+- bill items
+- room charges
+- service charges
+- taxes
+- discounts
+- breakage charges
+- upgrade charges
+- downgrade adjustments
+- early/late checkout charges
+- finalization
+
+Database:
+
+billing_db
+
+------------------------------------------------------------
+RATE SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- base rates
+- dynamic pricing
+- seasonal rates
+- weekend pricing
+- holiday pricing
+- occupancy pricing
+- last-minute pricing
+- first-night price
+- extension price
+
+Database:
+
+rate_db
+
+------------------------------------------------------------
+STAFF SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- staff
+- attendance
+- shifts
+- leave
+- staff operational availability
+
+Database:
+
+staff_db
+
+------------------------------------------------------------
+INVENTORY SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- inventory
+- stock
+- stock movements
+- reorder rules
+- low-stock detection
+
+Database:
+
+inventory_db
+
+------------------------------------------------------------
+GUEST EXPERIENCE SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- guest service requests
+- QR room service requests
+- special requests
+- feedback
+- complaints
+- loyalty
+
+Database:
+
+guest_experience_db
+
+------------------------------------------------------------
+OPERATIONS SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- housekeeping
+- room assignment
+- housekeeping tasks
+- maintenance
+- breakage
+- expenses
+- utilities
+- cash drawer
+- shift handover
+
+Database:
+
+operations_db
+
+------------------------------------------------------------
+REPORTING SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- occupancy reports
+- revenue reports
+- expense reports
+- staff performance reports
+- daily summaries
+- reporting read models
+
+Database:
+
+reporting_db
+
+------------------------------------------------------------
+NOTIFICATION SERVICE
+------------------------------------------------------------
+
+Owns:
+
+- notification records
+- event consumption
+- notification coordination
+- notification status
+
+Database:
+
+notification_db
+
+
+=======================================================================
+6. DATABASE ARCHITECTURE
+=======================================================================
+
+Use database-per-service.
+
+Databases:
+
+auth_db
+guest_db
+room_db
+reservation_db
+payment_db
+billing_db
+rate_db
+staff_db
+inventory_db
+guest_experience_db
+operations_db
+reporting_db
+notification_db
+
+Do NOT use a shared database.
+
+Do NOT allow one service to directly connect to another service's
+database.
+
+Do NOT create cross-service foreign keys.
+
+Example:
+
+reservation_db.reservations.guest_id
+
+is a logical reference only.
+
+It is NOT a foreign key into guest_db.
+
+Cross-service communication must happen through:
+
+REST + OpenFeign
+
+or:
+
+RabbitMQ
+
+
+=======================================================================
+7. STANDARD DATABASE RULES
+=======================================================================
+
+Use:
+
+- primary keys
+- unique constraints
+- indexes
+- NOT NULL constraints
+- appropriate lengths
+- timestamps
+- status columns
+- optimistic locking where necessary
+
+Use:
+
+createdAt
+updatedAt
+
+for important entities.
+
+Use history/transaction tables for:
+
+- payments
+- refunds
+- inventory
+- loyalty
+- service requests
+- housekeeping tasks
+- complaints
+- operational state changes where appropriate
+
+Historical financial values must remain immutable after finalization.
+
+Do not overwrite historical payment or refund records.
+
+Do not overwrite inventory movement history.
+
+
+=======================================================================
+8. FINAL ROLES
+=======================================================================
+
+Roles:
+
+ADMIN
+OWNER
+MANAGER
+RECEPTIONIST
+HOUSEKEEPER
+GUEST
+
+
+=======================================================================
+9. ADMIN ROLE
+=======================================================================
+
+ADMIN is a system-level administrative role.
+
+Can:
+
+- manage users
+- manage roles
+- enable/disable accounts
+- unlock accounts
+- perform authorized system administration
+
+ADMIN should not automatically bypass all business rules unless
+explicitly required.
+
+Do not expose sensitive financial operations unnecessarily.
+
+
+=======================================================================
+10. OWNER ROLE
+=======================================================================
+
+OWNER represents the hotel business owner.
+
+Owner has broad business-level access to:
+
+- users where authorized
+- guests
+- rooms
+- halls
+- room categories
+- amenities
+- rates
+- dynamic pricing
+- staff
+- inventory
+- reservations
+- payments
+- billing
+- reports
+- operations
+- housekeeping oversight
+- maintenance oversight
+- expenses
+- utilities
+- cash drawer
+- shift handover
+- complaints
+- loyalty
+- business configuration
+
+
+=======================================================================
+11. MANAGER ROLE
+=======================================================================
+
+MANAGER manages hotel operations.
+
+Can:
+
+- manage rooms operationally
+- manage guests
+- manage staff operations
+- manage inventory
+- approve breakage
+- manage housekeeping
+- assign housekeepers
+- manage maintenance
+- manage expenses
+- manage utilities
+- review reports
+- manage service requests
+- review complaints
+- manage shifts
+- review cash drawer
+- perform authorized reservation operations
+
+
+=======================================================================
+12. RECEPTIONIST ROLE
+=======================================================================
+
+RECEPTIONIST is primarily responsible for front desk operations.
+
+Can:
+
+- search rooms
+- search halls where applicable
+- register guests
+- create reservations
+- modify reservations
+- cancel reservations
+- check-in
+- check-out
+- transfer room
+- upgrade room
+- downgrade room
+- process authorized payments
+- view relevant bills
+- handle guest-facing reservation operations
+
+
+=======================================================================
+13. HOUSEKEEPER ROLE
+=======================================================================
+
+HOUSEKEEPER is responsible for operational execution.
+
+Can:
+
+- view assigned housekeeping tasks
+- accept task
+- reject task
+- start task
+- complete task
+- clean rooms
+- deliver amenities
+- deliver towels
+- deliver room-service requests
+- handle laundry requests
+- handle guest cleaning requests
+- handle special requests
+- report breakage/damage
+- view operational information necessary for assigned work
+
+Cannot:
+
+- create users
+- manage users
+- change pricing
+- create reservations
+- cancel reservations
+- issue refunds
+- manage staff
+- modify financial records
+- arbitrarily mark rooms AVAILABLE
+- access unrelated guests' private data
+
+
+=======================================================================
+14. GUEST ROLE
+=======================================================================
+
+GUEST can:
+
+- manage own profile
+- search rooms
+- view room details
+- view rates
+- create own reservation
+- view own reservation
+- modify eligible reservation
+- cancel eligible reservation
+- make payment
+- request refund where business rules permit
+- submit service requests
+- submit special requests
+- request room cleaning
+- request towels
+- request amenities
+- request laundry
+- request room service
+- submit feedback
+- submit complaint
+- view own complaint status
+- view loyalty account
+- view own notifications
+
+A guest MUST NOT access another guest's data merely by changing an ID
+in a URL.
+
+
+=======================================================================
+15. SECURITY ARCHITECTURE
+=======================================================================
+
+Implement:
+
+Spring Security
+JWT
+role-based authorization
+
+Security flow:
+
+Client
+    ↓
+API Gateway
+    ↓
+JWT validation
+    ↓
+route request
+    ↓
+target service
+    ↓
+JWT validation again
+    ↓
+role authorization
+    ↓
+controller
+    ↓
+service
+    ↓
+repository
+
+
+=======================================================================
+16. JWT REQUIREMENTS
+=======================================================================
+
+JWT should contain appropriate claims such as:
+
+- userId
+- username where required
+- role
+- issuedAt
+- expiration
+
+Never log:
+
+- password
+- JWT token
+- raw card number
+- CVV
+- sensitive credentials
+
+Use configuration/environment values for secrets.
+
+Do not hard-code security secrets.
+
+
+=======================================================================
+17. ACCOUNT LOCK
+=======================================================================
+
+Implement:
+
+failed login tracking
+
+Example:
+
+incorrect password
+→ increment failed attempt
+
+threshold reached
+→ temporary account lock
+
+publish security event
+
+notification-service receives event
+
+Owner/authorized administrator receives notification record.
+
+The threshold must be configurable.
+
+
+=======================================================================
+18. OBJECT-LEVEL AUTHORIZATION
+=======================================================================
+
+Role authorization alone is NOT enough.
+
+Example:
+
+Guest A:
+
+GET /api/reservations/100
+
+If reservation 100 belongs to Guest B:
+
+return:
+
+403 Forbidden
+
+Housekeeper A:
+
+GET /api/housekeeping/tasks/500
+
+If task 500 belongs to Housekeeper B:
+
+return:
+
+403 Forbidden
+
+Apply ownership checks where applicable.
+
+
+=======================================================================
+19. GLOBAL ERROR RESPONSE
+=======================================================================
+
+Every business service must have:
+
+@RestControllerAdvice
+
+Create exceptions such as:
+
+ResourceNotFoundException
+DuplicateResourceException
+BusinessRuleException
+UnauthorizedException
+ForbiddenException
+ValidationException
+ExternalServiceException
+
+Return consistent error DTO:
+
+{
+    "timestamp": "...",
+    "status": 404,
+    "error": "NOT_FOUND",
+    "message": "Room not found",
+    "path": "/api/rooms/205",
+    "traceId": "..."
+}
+
+Use correlationId/traceId consistently.
+
+Do not expose stack traces.
+
+
+=======================================================================
+20. VALIDATION
+=======================================================================
+
+Use Jakarta Validation.
+
+Use appropriate:
+
+@NotNull
+@NotBlank
+@Email
+@Size
+@Min
+@Max
+@Pattern
+@Future
+@FutureOrPresent
+@Positive
+@PositiveOrZero
+
+Validate request DTOs.
+
+Business validation belongs in service layer.
+
+Important validation:
+
+- checkout after check-in
+- nights consistent with dates
+- adults valid
+- children valid
+- guest count within room occupancy
+- room availability
+- reservation overlap
+- valid status transition
+- payment amount positive
+- refund amount valid
+- inventory quantity valid
+- room assignment range valid
+- staff role valid
+- staff active
+- shift eligibility
+
+
+=======================================================================
+21. DTO ARCHITECTURE
+=======================================================================
+
+NEVER expose JPA entities directly.
+
+Use:
+
+Request DTO
+→ Controller
+→ Service
+→ Entity
+→ Repository
+
+and:
+
+Repository
+→ Entity
+→ Service
+→ Response DTO
+→ Controller
+
+Use separate:
+
+CreateRequest
+UpdateRequest
+ResponseDTO
+
+Examples:
+
+CreateGuestRequest
+UpdateGuestRequest
+GuestResponse
+
+CreateRoomRequest
+UpdateRoomRequest
+RoomResponse
+
+CreateReservationRequest
+ReservationResponse
+
+CreatePaymentRequest
+PaymentResponse
+
+ServiceRequestResponse
+
+HousekeepingTaskResponse
+
+
+=======================================================================
+22. ROOM MANAGEMENT
+=======================================================================
+
+room-service manages:
+
+- rooms
+- room categories
+- room types
+- amenities
+- room status
+- bookable halls/resources
+
+Room categories:
+
+SINGLE
+DOUBLE
+DELUXE
+SUITE
+
+Room status:
+
+AVAILABLE
+RESERVED
+OCCUPIED
+DIRTY
+CLEANING
+CLEAN
+MAINTENANCE
+OUT_OF_SERVICE
+
+
+=======================================================================
+23. ROOM STATUS STATE MACHINE
+=======================================================================
+
+Primary lifecycle:
+
+AVAILABLE
+    ↓
+RESERVED
+    ↓
+OCCUPIED
+    ↓
+DIRTY
+    ↓
+CLEANING
+    ↓
+CLEAN
+    ↓
+AVAILABLE
+
+
+Maintenance:
+
+AVAILABLE
+    ↓
+MAINTENANCE
+    ↓
+AVAILABLE
+
+
+Out of service:
+
+AVAILABLE
+    ↓
+OUT_OF_SERVICE
+
+
+Do not allow arbitrary transitions.
+
+A Housekeeper must NOT directly set:
+
+CLEAN → AVAILABLE
+
+The business workflow should control final availability after
+verification.
+
+
+=======================================================================
+24. ROOM AVAILABILITY
+=======================================================================
+
+Room availability must NOT depend only on:
+
+room.status = AVAILABLE
+
+Availability must consider:
+
+- reservation dates
+- check-in
+- check-out
+- overlapping reservations
+- room state
+- maintenance
+- out-of-service state
+- occupancy capacity
+
+Prevent double booking.
+
+Two simultaneous reservation requests must not both successfully
+reserve the same room for overlapping dates.
+
+
+=======================================================================
+25. ROOM APIs
+=======================================================================
+
+Implement:
+
+POST /api/rooms
+
+GET /api/rooms
+
+GET /api/rooms/{id}
+
+PUT /api/rooms/{id}
+
+DELETE /api/rooms/{id}
+
+GET /api/rooms/available
+
+GET /api/rooms/availability/check
+
+POST/PUT /api/rooms/{id}/status
+
+
+=======================================================================
+26. ROOM CATEGORY APIs
+=======================================================================
+
+POST /api/room-categories
+
+GET /api/room-categories
+
+GET /api/room-categories/{id}
+
+PUT /api/room-categories/{id}
+
+DELETE /api/room-categories/{id}
+
+
+=======================================================================
+27. AMENITY APIs
+=======================================================================
+
+POST /api/amenities
+
+GET /api/amenities
+
+GET /api/amenities/{id}
+
+PUT /api/amenities/{id}
+
+DELETE /api/amenities/{id}
+
+
+=======================================================================
+28. HALL RESERVATION SUPPORT
+=======================================================================
+
+The original HMS scope includes hall reservation.
+
+Do NOT create a hall-service.
+
+Represent a hotel hall as a bookable resource within room-service or
+an appropriate resource model owned by room-service.
+
+Hall should support information such as:
+
+- hall code
+- hall name
+- capacity
+- description
+- availability
+- status
+- facilities
+- rate information where applicable
+
+Reservation-service owns the actual reservation.
+
+Example:
+
+POST /api/reservations
+
+with resourceType:
+
+ROOM
+or
+HALL
+
+OR use a clearly separated reservation DTO/model for hall bookings.
+
+The implementation must avoid mixing room and hall rules incorrectly.
+
+Hall bookings must also prevent overlapping reservations.
+
+
+=======================================================================
+29. GUEST MANAGEMENT
+=======================================================================
+
+guest-service manages guest/member profiles.
+
+Guest fields:
+
+- id
+- memberCode
+- firstName
+- lastName
+- phone
+- company
+- email
+- gender
+- address
+- createdAt
+- updatedAt
+
+Original source requires member code, phone, company, name, email,
+gender and address.
+
+Validate:
+
+- member code
+- phone
+- email
+- required information
+- uniqueness
+
+
+=======================================================================
+30. GUEST APIs
+=======================================================================
+
+POST /api/guests
+
+GET /api/guests
+
+GET /api/guests/{id}
+
+PUT /api/guests/{id}
+
+DELETE /api/guests/{id}
+
+
+=======================================================================
+31. STAFF MANAGEMENT
+=======================================================================
+
+staff-service manages:
+
+- staff
+- attendance
+- shifts
+- leave
+
+Staff information must support the original requirements where
+appropriate:
+
+- employee code
+- employee name
+- address
+- NIC
+- salary
+- age
+- occupation
+- email
+- role
+- active status
+
+Be careful with sensitive staff information.
+
+Only authorized roles may access salary/NIC information.
+
+
+=======================================================================
+32. STAFF APIs
+=======================================================================
+
+POST /api/staff
+
+GET /api/staff
+
+GET /api/staff/{id}
+
+PUT /api/staff/{id}
+
+DELETE /api/staff/{id}
+
+
+=======================================================================
+33. ATTENDANCE
+=======================================================================
+
+Support:
+
+- attendance check-in
+- attendance check-out
+- date
+- staff
+- status
+- shift association where appropriate
+
+APIs:
+
+POST /api/attendance
+
+GET /api/attendance
+
+GET /api/attendance/staff/{staffId}
+
+
+=======================================================================
+34. SHIFT MANAGEMENT
+=======================================================================
+
+Support:
+
+- shift creation
+- shift update
+- staff assignment
+- shift start
+- shift end
+- active shift validation
+
+APIs:
+
+POST /api/shifts
+
+GET /api/shifts
+
+GET /api/shifts/{id}
+
+PUT /api/shifts/{id}
+
+DELETE /api/shifts/{id}
+
+
+=======================================================================
+35. LEAVE MANAGEMENT
+=======================================================================
+
+Support:
+
+- leave request
+- approval
+- rejection
+- leave status
+- manager authorization
+
+APIs:
+
+POST /api/leave
+
+GET /api/leave
+
+GET /api/leave/{id}
+
+PUT /api/leave/{id}
+
+
+=======================================================================
+36. INVENTORY
+=======================================================================
+
+inventory-service manages:
+
+- inventory items
+- stock
+- stock-in
+- stock-out
+- adjustment
+- reorder threshold
+- low-stock detection
+- movement history
+
+Entities:
+
+InventoryItem
+StockMovement
+ReorderRule
+
+
+=======================================================================
+37. INVENTORY APIs
+=======================================================================
+
+POST /api/inventory
+
+GET /api/inventory
+
+GET /api/inventory/{id}
+
+PUT /api/inventory/{id}
+
+DELETE /api/inventory/{id}
+
+POST /api/inventory/{id}/stock-in
+
+POST /api/inventory/{id}/stock-out
+
+POST /api/inventory/{id}/adjust
+
+GET /api/inventory/{id}/movements
+
+GET /api/inventory/low-stock
+
+
+=======================================================================
+38. LOW STOCK
+=======================================================================
+
+When stock falls below configured threshold:
+
+Inventory transaction
+→ quantity updated
+→ threshold detected
+→ publish LowStockDetected
+→ RabbitMQ
+→ notification-service
+→ notification record
+→ Manager/Owner alert
+
+Do not only overwrite quantity.
+
+Maintain stock movement history.
+
+
+=======================================================================
+39. RATE MANAGEMENT
+=======================================================================
+
+rate-service manages:
+
+- base rate
+- first-night price
+- extension price
+- weekend pricing
+- holiday pricing
+- seasonal pricing
+- peak pricing
+- occupancy-based pricing
+- last-minute pricing
+
+Original rate requirements include:
+
+- check-in
+- check-out
+- day
+- number of guests
+- first night price
+- extension price
+
+
+=======================================================================
+40. RATE APIs
+=======================================================================
+
+POST /api/rates
+
+GET /api/rates
+
+GET /api/rates/{id}
+
+PUT /api/rates/{id}
+
+DELETE /api/rates/{id}
+
+POST /api/rates/quote
+
+
+=======================================================================
+41. DYNAMIC PRICING
+=======================================================================
+
+Price calculation can consider:
+
+base price
++
+weekend adjustment
++
+holiday adjustment
++
+seasonal adjustment
++
+occupancy adjustment
++
+last-minute adjustment
+
+The final quoted amount must be returned by rate-service.
+
+Reservation-service calls rate-service using OpenFeign.
+
+Once quoted:
+
+store the quoted amount in reservation/billing.
+
+Future rate changes must not alter already finalized historical charges.
+
+
+=======================================================================
+42. RESERVATION MANAGEMENT
+=======================================================================
+
+reservation-service manages:
+
+- room reservation
+- hall reservation
+- create
+- modify
+- cancel
+- confirmation
+- check-in
+- check-out
+- no-show
+- waitlist
+- room transfer
+- room upgrade
+- room downgrade
+- early check-in
+- late checkout
+
+
+=======================================================================
+43. RESERVATION ENTITY
+=======================================================================
+
+Support:
+
+id
+reservationCode
+guestId
+resourceType
+roomId where applicable
+hallId where applicable
+roomCategoryId where applicable
+adults
+children
+checkInDateTime
+checkOutDateTime
+nights
+quotedAmount
+status
+createdAt
+updatedAt
+
+Do not duplicate guest profile information.
+
+
+=======================================================================
+44. RESERVATION STATUS
+=======================================================================
+
+Use:
+
+PENDING
+CONFIRMED
+CHECKED_IN
+CHECKED_OUT
+CANCELLED
+NO_SHOW
+
+
+=======================================================================
+45. RESERVATION STATE MACHINE
+=======================================================================
+
+Valid lifecycle:
+
+PENDING
+→ CONFIRMED
+→ CHECKED_IN
+→ CHECKED_OUT
+
+
+Cancellation:
+
+PENDING
+→ CANCELLED
+
+CONFIRMED
+→ CANCELLED
+
+
+No-show:
+
+CONFIRMED
+→ NO_SHOW
+
+
+Invalid transitions must be rejected.
+
+Examples:
+
+CANCELLED → CHECKED_IN
+
+must fail.
+
+CHECKED_OUT → CHECKED_IN
+
+must fail.
+
+NO_SHOW → CHECKED_IN
+
+must fail unless an explicit authorized correction workflow exists.
+
+
+=======================================================================
+46. RESERVATION APIs
+=======================================================================
+
+POST /api/reservations
+
+GET /api/reservations
+
+GET /api/reservations/{id}
+
+PUT /api/reservations/{id}
+
+DELETE /api/reservations/{id}
+
+POST /api/reservations/{id}/cancel
+
+POST /api/reservations/{id}/check-in
+
+POST /api/reservations/{id}/check-out
+
+POST /api/reservations/{id}/no-show
+
+POST /api/reservations/{id}/room-transfer
+
+POST /api/reservations/{id}/room-upgrade
+
+POST /api/reservations/{id}/room-downgrade
+
+POST /api/reservations/{id}/early-check-in
+
+POST /api/reservations/{id}/late-checkout
+
+GET /api/reservations/guest/{guestId}
+
+GET /api/reservations/room/{roomId}
+
+
+=======================================================================
+47. SEARCH ROOMS
+=======================================================================
+
+Search must support:
+
+- check-in
+- check-out
+- number of guests
+- room category where applicable
+- room type where applicable
+
+Flow:
+
+Client
+→ Gateway
+→ reservation/room search
+→ Room Service
+→ availability calculation
+→ Rate Service
+→ pricing quote
+→ response
+
+Return appropriate room details and pricing.
+
+
+=======================================================================
+48. EARLY CHECK-IN
+=======================================================================
+
+Support early check-in according to hotel policy.
+
+Validate:
+
+- reservation exists
+- reservation is confirmed
+- room available
+- early check-in allowed
+- additional charge if applicable
+
+If additional fee exists:
+
+add billing charge.
+
+Do not simply change dates without business validation.
+
+
+=======================================================================
+49. LATE CHECKOUT
+=======================================================================
+
+Support late checkout.
+
+Validate:
+
+- reservation is checked in
+- requested checkout extension
+- room availability for next booking
+- hotel policy
+- additional charge if applicable
+
+If applicable:
+
+calculate late checkout charge
+→ billing-service
+
+Update reservation checkout time only after validation.
+
+
+=======================================================================
+50. ROOM TRANSFER
+=======================================================================
+
+Flow:
+
+Guest/receptionist requests transfer
+→ validate reservation
+→ check target room
+→ check availability
+→ calculate pricing difference
+→ authorize
+→ update reservation
+→ release old room
+→ assign new room
+→ update billing if needed
+→ publish event
+→ notification
+
+Use OpenFeign for synchronous availability/rate calls.
+
+
+=======================================================================
+51. ROOM UPGRADE
+=======================================================================
+
+Flow:
+
+request upgrade
+→ identify higher category
+→ check availability
+→ obtain rate difference
+→ authorize
+→ update reservation
+→ add billing charge
+→ publish event
+→ notification
+
+
+=======================================================================
+52. ROOM DOWNGRADE
+=======================================================================
+
+The original enhanced scope includes downgrade.
+
+Support:
+
+request downgrade
+→ validate lower category
+→ check availability
+→ calculate price difference
+→ apply refund/credit/adjustment policy
+→ update reservation
+→ update billing
+→ notification
+
+Do not automatically refund without business validation.
+
+
+=======================================================================
+53. WAITLIST
+=======================================================================
+
+If requested room/category is unavailable:
+
+Guest can join waitlist.
+
+Waitlist fields:
+
+id
+guestId
+requestedResource/category
+checkIn
+checkOut
+priority
+status
+createdAt
+updatedAt
+
+When availability opens:
+
+RoomAvailable event
+→ identify eligible waitlist
+→ notify guest/receptionist
+
+Do not automatically confirm unless the workflow explicitly allows it.
+
+
+=======================================================================
+54. NO-SHOW
+=======================================================================
+
+Confirmed reservation:
+
+CONFIRMED
+→ configured grace period
+→ NO_SHOW
+
+Then:
+
+- release room
+- apply no-show policy
+- apply penalty if applicable
+- update billing/payment if applicable
+- publish ReservationNoShow
+- notify relevant users
+
+
+=======================================================================
+55. PAYMENT SERVICE
+=======================================================================
+
+Payment methods:
+
+CASH
+CARD
+UPI
+WALLET
+
+Payment fields:
+
+id
+reservationId
+amount
+paymentMethod
+status
+providerReference
+idempotencyKey
+paymentTime
+createdAt
+updatedAt
+
+Never store:
+
+- raw card number
+- CVV
+- sensitive payment credentials
+
+
+=======================================================================
+56. PAYMENT APIs
+=======================================================================
+
+POST /api/payments
+
+GET /api/payments/{id}
+
+GET /api/payments/reservation/{reservationId}
+
+POST /api/payments/{id}/refund
+
+
+=======================================================================
+57. PAYMENT IDEMPOTENCY
+=======================================================================
+
+Repeated payment requests must not create duplicate charges.
+
+Implement an idempotency mechanism.
+
+Example:
+
+same idempotencyKey
+→ same logical payment
+→ do not create duplicate successful payment
+
+Do not blindly retry payment creation using Resilience4j.
+
+
+=======================================================================
+58. REFUNDS
+=======================================================================
+
+Refund must validate:
+
+- payment exists
+- refundable amount
+- already refunded amount
+- remaining refundable amount
+- refund policy
+- authorized user
+
+Refund amount must never exceed eligible paid amount.
+
+Store refund as a separate record.
+
+Publish:
+
+RefundCompleted
+
+
+=======================================================================
+59. BILLING
+=======================================================================
+
+Billing must support:
+
+- room charge
+- hall charge where applicable
+- service charge
+- taxes
+- discounts
+- breakage
+- late checkout
+- early check-in
+- upgrade
+- downgrade adjustments
+- other approved charges
+
+Tables:
+
+bills
+bill_items
+
+
+=======================================================================
+60. BILLING APIs
+=======================================================================
+
+POST /api/bills
+
+GET /api/bills/{id}
+
+GET /api/bills/reservation/{reservationId}
+
+POST /api/bills/{id}/items
+
+POST /api/bills/{id}/calculate
+
+POST /api/bills/{id}/finalize
+
+
+=======================================================================
+61. BILLING CALCULATION
+=======================================================================
+
+Billing calculation must be deterministic.
+
+Example:
+
+Room charge
++
+service charges
++
+tax
++
+breakage
++
+late checkout
++
+upgrade
+-
+discount
+=
+total
+
+Maintain:
+
+subtotal
+tax
+discount
+total
+paidAmount
+outstandingAmount
+
+
+=======================================================================
+62. BILL FINALIZATION
+=======================================================================
+
+Once a bill is finalized:
+
+- prevent arbitrary modification
+- preserve financial values
+- preserve bill items
+- preserve timestamps
+
+Corrections must happen through explicit adjustment/refund/business
+processes.
+
+Do not silently recalculate historical invoices based on current rates.
+
+
+=======================================================================
+63. BILL PRINT REPRESENTATION
+=======================================================================
+
+The original HMS requirement expects a printable bill.
+
+Implement an API that returns a clean bill representation suitable for
+printing.
+
+For example:
+
+GET /api/bills/{id}/print
+
+The response should contain:
+
+- billing number
+- guest
+- reservation
+- room/hall
+- dates
+- items
+- quantity
+- unit price
+- taxes
+- discounts
+- total
+- paid
+- outstanding
+- date
+
+Do not introduce an unapproved PDF-generation technology.
+
+If the existing project already contains an approved printable
+representation, preserve it.
+
+Otherwise return a structured printable representation that can be
+rendered by a client.
+
+
+=======================================================================
+64. STAFF PAYMENTS / STAFF REPORTING
+=======================================================================
+
+The original project mentions staff payment reporting.
+
+Salary information may exist in staff-service.
+
+Reporting-service can generate authorized staff-payment/payroll-related
+reports using approved data/events.
+
+Do not create a payroll-service.
+
+Do not expose salary information to unauthorized roles.
+
+
+=======================================================================
+65. GUEST EXPERIENCE
+=======================================================================
+
+guest-experience-service owns:
+
+- service requests
+- QR room service
+- special requests
+- feedback
+- complaints
+- loyalty
+
+
+=======================================================================
+66. SERVICE REQUEST VS HOUSEKEEPING TASK
+=======================================================================
+
+This distinction is mandatory.
+
+ServiceRequest:
+
+"What does the guest want?"
+
+HousekeepingTask:
+
+"What must hotel staff execute?"
+
+Do not combine them.
+
+
+=======================================================================
+67. SERVICE REQUEST TABLE
+=======================================================================
+
+service_requests:
+
+id
+requestCode
+reservationId
+guestId
+roomId
+requestType
+description
+quantity
+priority
+status
+createdAt
+updatedAt
+completedAt
+
+Request types:
+
+ROOM_CLEANING
+EXTRA_TOWELS
+AMENITY
+FOOD_ORDER
+LAUNDRY
+MAINTENANCE
+SPECIAL_REQUEST
+
+
+=======================================================================
+68. SERVICE REQUEST STATUS
+=======================================================================
+
+PENDING
+ASSIGNED
+ACCEPTED
+IN_PROGRESS
+COMPLETED
+CANCELLED
+REJECTED
+
+Maintain:
+
+service_request_history
+
+with:
+
+id
+serviceRequestId
+oldStatus
+newStatus
+changedBy
+remarks
+createdAt
+
+
+=======================================================================
+69. SERVICE REQUEST APIs
+=======================================================================
+
+POST /api/service-requests
+
+GET /api/service-requests/{id}
+
+GET /api/service-requests/reservation/{reservationId}
+
+GET /api/service-requests/guest/{guestId}
+
+POST /api/service-requests/{id}/cancel
+
+
+=======================================================================
+70. QR ROOM SERVICE
+=======================================================================
+
+The original HMS includes QR room service.
+
+Implement QR-related room request functionality without introducing a
+new service.
+
+A QR-associated request must identify:
+
+- roomId
+- reservation context where available
+- guest/request context where appropriate
+
+Support:
+
+- food request
+- laundry
+- towels
+- cleaning
+- maintenance
+- amenities
+- special requests
+
+Do not create a restaurant-service.
+
+FOOD_ORDER is treated as a guest service request and operational
+delivery task in this version.
+
+
+=======================================================================
+71. SPECIAL REQUESTS
+=======================================================================
+
+Support examples:
+
+- extra pillows
+- baby cot
+- high-floor preference
+- bed type
+- extra amenities
+- special occasion
+- accessibility-related operational request
+- other hotel-approved requests
+
+Link request to:
+
+reservation
+guest
+room
+
+where applicable.
+
+
+=======================================================================
+72. FEEDBACK
+=======================================================================
+
+Support:
+
+- rating
+- comments
+- guest
+- reservation
+- room where appropriate
+- date
+
+Only eligible guests should be allowed to submit stay-related feedback.
+
+Validate rating range.
+
+
+=======================================================================
+73. COMPLAINTS
+=======================================================================
+
+Complaint lifecycle:
+
+OPEN
+→ IN_PROGRESS
+→ RESOLVED
+
+Support:
+
+- create
+- view
+- assign
+- update
+- resolution remarks
+- history
+
+Guest can view own complaints.
+
+Manager/authorized staff can process complaints.
+
+
+=======================================================================
+74. LOYALTY
+=======================================================================
+
+Loyalty levels:
+
+SILVER
+GOLD
+PLATINUM
+
+Support:
+
+- loyalty account
+- points
+- earning
+- redemption
+- level
+- balance
+- transaction history
+
+Points can be earned from eligible spending.
+
+Maintain loyalty transaction history.
+
+Do not simply overwrite the balance without transaction records.
+
+
+=======================================================================
+75. OPERATIONS SERVICE
+=======================================================================
+
+operations-service owns:
+
+- room assignments
+- housekeeping
+- maintenance
+- breakage
+- expenses
+- utilities
+- cash drawer
+- shift handover
+
+
+=======================================================================
+76. HOUSEKEEPING
+=======================================================================
+
+Do NOT create housekeeping-service.
+
+Housekeeping belongs to operations-service.
+
+Housekeeping is responsible for:
+
+- checkout cleaning
+- guest-request cleaning
+- deep cleaning
+- amenity delivery
+- room service delivery
+- laundry
+- room operational task execution
+
+
+=======================================================================
+77. HOUSEKEEPER ROOM RANGE ASSIGNMENT
+=======================================================================
+
+Example:
+
+HK001
+→ Rooms 1–50
+
+HK002
+→ Rooms 51–100
+
+Table:
+
+room_assignments
+
+Fields:
+
+id
+staffId
+startRoomNumber
+endRoomNumber
+effectiveFrom
+effectiveTo
+active
+createdAt
+updatedAt
+
+Validate:
+
+- staff exists
+- role is HOUSEKEEPER
+- staff active
+- start <= end
+- valid dates
+- conflicting active assignment
+- room existence where appropriate
+
+No cross-service foreign key.
+
+If there is no valid assignment:
+
+task = UNASSIGNED
+
+Manager should receive appropriate notification.
+
+
+=======================================================================
+78. HOUSEKEEPER SHIFT CHECK
+=======================================================================
+
+When assigning task:
+
+check:
+
+1. staff exists
+2. role = HOUSEKEEPER
+3. active
+4. room belongs to assigned range
+5. staff is eligible for current shift
+
+If not:
+
+Do not assign.
+
+Keep task UNASSIGNED.
+
+Notify Manager where appropriate.
+
+
+=======================================================================
+79. HOUSEKEEPING TASK
+=======================================================================
+
+housekeeping_tasks:
+
+id
+taskCode
+roomId
+reservationId
+taskType
+assignedStaffId
+priority
+status
+startedAt
+completedAt
+verifiedAt
+remarks
+createdAt
+updatedAt
+
+Task types:
+
+CHECKOUT_CLEANING
+GUEST_REQUEST_CLEANING
+DEEP_CLEANING
+ROOM_SERVICE
+AMENITY_DELIVERY
+LAUNDRY
+
+
+=======================================================================
+80. HOUSEKEEPING TASK STATUS
+=======================================================================
+
+UNASSIGNED
+ASSIGNED
+ACCEPTED
+IN_PROGRESS
+COMPLETED
+REJECTED
+VERIFIED
+CANCELLED
+
+Flow:
+
+UNASSIGNED
+→ ASSIGNED
+→ ACCEPTED
+→ IN_PROGRESS
+→ COMPLETED
+→ VERIFIED
+
+Rejection:
+
+ASSIGNED
+→ REJECTED
+→ REASSIGNED
+
+
+=======================================================================
+81. HOUSEKEEPING APIs
+=======================================================================
+
+GET /api/housekeeping/tasks/my
+
+GET /api/housekeeping/tasks/{id}
+
+POST /api/housekeeping/tasks/{id}/accept
+
+POST /api/housekeeping/tasks/{id}/start
+
+POST /api/housekeeping/tasks/{id}/complete
+
+POST /api/housekeeping/tasks/{id}/reject
+
+
+=======================================================================
+82. HOUSEKEEPING HISTORY
+=======================================================================
+
+task_history:
+
+id
+taskId
+oldStatus
+newStatus
+changedBy
+remarks
+createdAt
+
+Every meaningful status change must be recorded.
+
+
+=======================================================================
+83. CHECKOUT → HOUSEKEEPING
+=======================================================================
+
+Mandatory workflow:
+
+Guest
+→ checkout request
+
+Reservation-service:
+
+validate CHECKED_IN
+
+Billing-service:
+
+calculate final bill
+
+Payment-service:
+
+process outstanding amount
+
+Reservation:
+
+CHECKED_OUT
+
+Publish:
+
+ReservationCheckedOut
+
+Room:
+
+DIRTY
+
+Publish:
+
+RoomMarkedDirty
+
+Operations-service:
+
+consume event
+
+Create HousekeepingTask:
+
+CHECKOUT_CLEANING
+
+Find room assignment.
+
+Assign Housekeeper.
+
+Publish:
+
+HousekeepingTaskAssigned
+
+Notification-service:
+
+create notification
+
+Housekeeper:
+
+ACCEPTED
+
+→ IN_PROGRESS
+
+Room:
+
+DIRTY
+→ CLEANING
+
+Housekeeper:
+
+complete task
+
+Room:
+
+CLEAN
+
+Manager/authorized workflow:
+
+verify room
+
+Room:
+
+AVAILABLE
+
+Publish:
+
+RoomAvailable
+
+
+=======================================================================
+84. MAINTENANCE
+=======================================================================
+
+Maintenance belongs to operations-service.
+
+Lifecycle:
+
+OPEN
+→ ASSIGNED
+→ IN_PROGRESS
+→ RESOLVED
+→ INSPECTION
+→ AVAILABLE
+
+Room under maintenance cannot be booked.
+
+APIs should support:
+
+create issue
+view issue
+assign issue
+start work
+resolve issue
+inspect
+close
+
+
+=======================================================================
+85. BREAKAGE
+=======================================================================
+
+Flow:
+
+Housekeeper/staff
+→ report breakage
+→ Manager review
+→ approve/reject
+
+If approved:
+
+BreakageApproved
+→ RabbitMQ
+→ Billing-service
+→ bill item
+→ notification
+
+Maintain breakage history.
+
+
+=======================================================================
+86. EXPENSE MANAGEMENT
+=======================================================================
+
+Support:
+
+- category
+- amount
+- description
+- date
+- staff
+- approval status
+- remarks
+
+Manager/Owner access.
+
+Publish expense events for reporting.
+
+
+=======================================================================
+87. UTILITY MANAGEMENT
+=======================================================================
+
+Track:
+
+- electricity
+- water
+- gas
+- other hotel-approved utilities
+
+Support:
+
+- usage
+- cost
+- period
+- remarks
+
+Allow period comparison where useful.
+
+
+=======================================================================
+88. CASH DRAWER
+=======================================================================
+
+Cash calculation:
+
+opening cash
++
+cash received
+-
+cash expenses
+=
+expected closing cash
+
+Compare with:
+
+actual closing cash
+
+Track:
+
+- opening balance
+- received
+- paid
+- adjustment
+- expected closing
+- actual closing
+- difference
+- staff
+- shift
+- timestamps
+
+Finalized cash records should not be freely modified.
+
+
+=======================================================================
+89. SHIFT HANDOVER
+=======================================================================
+
+Shift handover must support information such as:
+
+- outgoing staff
+- incoming staff
+- shift
+- pending payments
+- arrivals
+- departures
+- pending complaints
+- pending service requests
+- pending housekeeping tasks
+- pending maintenance
+- cash information
+- remarks
+- handover status
+- timestamps
+
+This implements the original operational requirement that important
+pending hotel work is transferred between shifts.
+
+
+=======================================================================
+90. NOTIFICATION SERVICE
+=======================================================================
+
+notification-service consumes RabbitMQ events.
+
+Notification examples:
+
+- booking confirmation
+- booking cancellation
+- payment success
+- payment failure
+- refund completion
+- low stock
+- complaint created
+- complaint resolved
+- no-show
+- waitlist availability
+- housekeeping assignment
+- service request update
+- failed login/account lock
+- maintenance update
+- daily summary
+- breakage charge
+
+Store notification records.
+
+Do not create email-service or sms-service.
+
+The system may classify notification channels logically such as:
+
+EMAIL
+SMS
+IN_APP
+
+but do not introduce external transport services unless explicitly
+approved.
+
+
+=======================================================================
+91. RABBITMQ ARCHITECTURE
+=======================================================================
+
+RabbitMQ is used for asynchronous business events.
+
+Important events:
+
+ReservationCreated
+ReservationConfirmed
+ReservationCancelled
+ReservationCheckedIn
+ReservationCheckedOut
+ReservationNoShow
+
+PaymentSucceeded
+PaymentFailed
+RefundCompleted
+
+RoomMarkedDirty
+RoomMarkedClean
+RoomAvailable
+RoomMaintenanceStarted
+RoomMaintenanceCompleted
+
+ServiceRequestCreated
+ServiceRequestAssigned
+ServiceRequestCompleted
+ServiceRequestCancelled
+
+HousekeepingTaskCreated
+HousekeepingTaskAssigned
+HousekeepingTaskAccepted
+HousekeepingTaskStarted
+HousekeepingTaskCompleted
+
+LowStockDetected
+
+ComplaintCreated
+ComplaintResolved
+
+BreakageApproved
+
+ExpenseCreated
+
+StaffShiftStarted
+StaffShiftEnded
+
+WaitlistAvailabilityDetected
+
+DailySummaryGenerated
+
+
+=======================================================================
+92. EVENT FORMAT
+=======================================================================
+
+Use a consistent event envelope.
+
+Example:
+
+{
+    "eventId": "...",
+    "eventType": "...",
+    "sourceService": "...",
+    "correlationId": "...",
+    "occurredAt": "...",
+    "payload": {}
+}
+
+Payload should contain relevant IDs.
+
+Examples:
+
+reservationId
+guestId
+roomId
+staffId
+paymentId
+billId
+
+Do not include passwords, JWTs, raw card data, or unnecessary sensitive
+information.
+
+
+=======================================================================
+93. RABBITMQ IDEMPOTENCY
+=======================================================================
+
+RabbitMQ may redeliver messages.
+
+Consumers must therefore be idempotent.
+
+Example:
+
+HousekeepingTaskCreated received twice
+
+→ only one task must exist.
+
+PaymentSucceeded received twice
+
+→ no duplicate financial effect.
+
+LowStockDetected received twice
+
+→ no duplicate business operation.
+
+Use eventId or equivalent processing control.
+
+Record processing state where required.
+
+
+=======================================================================
+94. SAGA
+=======================================================================
+
+Use Saga Design Pattern.
+
+Do NOT use distributed transactions.
+
+Reservation and payment are separate local transactions.
+
+Mandatory Saga:
+
+Create Reservation
+→ PENDING
+
+Check/hold room where applicable
+
+Get pricing
+
+Create payment
+
+Payment succeeds
+
+→ PaymentSucceeded
+
+Reservation confirms
+
+→ CONFIRMED
+
+Payment fails
+
+→ PaymentFailed
+
+Compensation:
+
+release room/hold
+cancel or mark reservation according to business rule
+notify relevant parties
+
+
+=======================================================================
+95. SAGA COMPENSATION
+=======================================================================
+
+Scenario 1:
+
+Payment fails after room hold.
+
+Compensation:
+
+release room
+cancel/fail reservation
+publish event
+notification
+
+
+Scenario 2:
+
+Cancellation after payment.
+
+Flow:
+
+reservation cancellation
+→ refund policy
+→ Payment-service refund
+→ RefundCompleted
+→ release room
+→ notification
+
+
+Scenario 3:
+
+Room unavailable during confirmation.
+
+Do not capture payment incorrectly.
+
+Fail reservation appropriately.
+
+Release any hold.
+
+Notify user.
+
+
+=======================================================================
+96. OPENFEIGN
+=======================================================================
+
+ALL synchronous inter-service communication must use OpenFeign.
+
+Examples:
+
+reservation-service
+→ guest-service
+
+reservation-service
+→ room-service
+
+reservation-service
+→ rate-service
+
+billing-service
+→ payment-service where immediate payment status is required
+
+operations-service
+→ staff-service
+
+operations-service
+→ room-service
+
+Do NOT use:
+
+RestTemplate
+
+WebClient
+
+raw HTTP client
+
+another HTTP client
+
+
+=======================================================================
+97. REST VS RABBITMQ RULE
+=======================================================================
+
+Use REST + OpenFeign when immediate information is required.
+
+Examples:
+
+Is guest valid?
+
+Is room available?
+
+What is the current price?
+
+Is staff member active?
+
+Use RabbitMQ when the operation is a business event.
+
+Examples:
+
+Reservation confirmed.
+
+Payment succeeded.
+
+Guest checked out.
+
+Room became dirty.
+
+Low stock detected.
+
+Housekeeping task assigned.
+
+Complaint resolved.
+
+Do not use RabbitMQ for simple queries.
+
+Do not use OpenFeign for fire-and-forget business events.
+
+
+=======================================================================
+98. RESILIENCE4J
+=======================================================================
+
+Use Resilience4j around appropriate remote service calls.
+
+Use:
+
+CircuitBreaker
+Retry
+TimeLimiter
+Bulkhead
+Fallback
+
+Retry only transient failures.
+
+DO NOT retry payment creation blindly.
+
+Example:
+
+Room Service unavailable:
+
+OpenFeign
+→ CircuitBreaker
+→ fallback
+→ controlled response
+
+Rate Service temporary network failure:
+
+OpenFeign
+→ Retry
+→ CircuitBreaker
+→ fallback if safe
+
+Notification failure should not unnecessarily break the core booking
+workflow.
+
+
+=======================================================================
+99. CORRELATION ID
+=======================================================================
+
+Every distributed workflow should carry correlationId.
+
+Example:
+
+Reservation workflow:
+
+Client
+→ Gateway
+→ Reservation
+→ Payment
+→ RabbitMQ
+→ Billing
+→ Notification
+
+The same correlationId should be used where appropriate.
+
+Logs must include correlationId/traceId.
+
+
+=======================================================================
+100. REPORTING
+=======================================================================
+
+reporting-service must NOT query other service databases.
+
+Build reporting data from:
+
+- RabbitMQ events
+- approved OpenFeign queries where necessary
+
+Prefer event-fed read models.
+
+Reports:
+
+1. Occupancy
+2. Revenue
+3. Expenses
+4. Staff performance
+5. Revenue trends
+6. Peak booking periods
+7. Daily hotel summary
+8. Staff payment-related report where authorized
+
+
+=======================================================================
+101. OCCUPANCY REPORT
+=======================================================================
+
+Include:
+
+- total rooms
+- occupied rooms
+- available rooms
+- dirty rooms
+- cleaning rooms
+- maintenance rooms
+- out-of-service rooms
+- occupancy percentage
+
+Calculate accurately from business events/read models.
+
+
+=======================================================================
+102. REVENUE REPORT
+=======================================================================
+
+Include:
+
+- room revenue
+- hall revenue where applicable
+- service revenue
+- other approved revenue
+- total revenue
+- date range
+- revenue trends
+
+
+=======================================================================
+103. EXPENSE REPORT
+=======================================================================
+
+Include:
+
+- expense category
+- amount
+- period
+- total
+- trend where appropriate
+
+
+=======================================================================
+104. STAFF PERFORMANCE REPORT
+=======================================================================
+
+Include operational information such as:
+
+- tasks completed
+- tasks rejected
+- housekeeping activity
+- attendance information
+- shift information
+
+Protect sensitive salary/NIC information.
+
+
+=======================================================================
+105. DAILY SUMMARY
+=======================================================================
+
+The original requirement includes an automated daily summary.
+
+Implement using Spring's scheduling capabilities.
+
+Do not introduce another scheduler technology.
+
+Daily summary should include:
+
+- arrivals
+- departures
+- occupancy
+- revenue
+- expenses
+- pending maintenance
+- complaints
+- low-stock items
+- reservations
+- cancellations
+- no-shows
+- pending service requests
+- pending housekeeping tasks
+
+Generate:
+
+DailySummaryGenerated
+
+Notification-service can create Owner/Manager notification records.
+
+
+=======================================================================
+106. API DESIGN
+=======================================================================
+
+Use RESTful APIs.
+
+Use:
+
+GET
+POST
+PUT
+PATCH where genuinely needed
+DELETE
+
+Use appropriate status codes:
+
+200 OK
+201 CREATED
+204 NO CONTENT
+400 BAD REQUEST
+401 UNAUTHORIZED
+403 FORBIDDEN
+404 NOT FOUND
+409 CONFLICT
+422 where appropriate
+500 INTERNAL SERVER ERROR
+503 SERVICE UNAVAILABLE
+
+
+=======================================================================
+107. API CONTRACT
+=======================================================================
+
+For every API document:
+
+- method
+- URL
+- purpose
+- authentication
+- required role
+- request DTO
+- response DTO
+- success status
+- validation errors
+- business errors
+- example request
+- example response
+
+Use Swagger/OpenAPI.
+
+Do not create Postman collections.
+
+
+=======================================================================
+108. FINAL API SET
+=======================================================================
+
+AUTH:
+
+POST /api/auth/login
+
+POST /api/users
+GET /api/users
+GET /api/users/{id}
+PUT /api/users/{id}
+DELETE /api/users/{id}
+
+
+GUEST:
+
+POST /api/guests
+GET /api/guests
+GET /api/guests/{id}
+PUT /api/guests/{id}
+DELETE /api/guests/{id}
+
+
+ROOM:
+
+POST /api/rooms
+GET /api/rooms
+GET /api/rooms/{id}
+PUT /api/rooms/{id}
+DELETE /api/rooms/{id}
+
+GET /api/rooms/available
+GET /api/rooms/availability/check
+
+POST/PUT /api/rooms/{id}/status
+
+
+ROOM CATEGORY:
+
+POST /api/room-categories
+GET /api/room-categories
+GET /api/room-categories/{id}
+PUT /api/room-categories/{id}
+DELETE /api/room-categories/{id}
+
+
+AMENITY:
+
+POST /api/amenities
+GET /api/amenities
+GET /api/amenities/{id}
+PUT /api/amenities/{id}
+DELETE /api/amenities/{id}
+
+
+HALL/RESOURCE:
+
+Create/manage hall resource through room-service APIs.
+
+Reservation-service handles actual hall reservations.
+
+
+RATE:
+
+POST /api/rates
+GET /api/rates
+GET /api/rates/{id}
+PUT /api/rates/{id}
+DELETE /api/rates/{id}
+
+POST /api/rates/quote
+
+
+RESERVATION:
+
+POST /api/reservations
+GET /api/reservations
+GET /api/reservations/{id}
+PUT /api/reservations/{id}
+DELETE /api/reservations/{id}
+
+POST /api/reservations/{id}/cancel
+POST /api/reservations/{id}/check-in
+POST /api/reservations/{id}/check-out
+POST /api/reservations/{id}/no-show
+POST /api/reservations/{id}/room-transfer
+POST /api/reservations/{id}/room-upgrade
+POST /api/reservations/{id}/room-downgrade
+POST /api/reservations/{id}/early-check-in
+POST /api/reservations/{id}/late-checkout
+
+GET /api/reservations/guest/{guestId}
+GET /api/reservations/room/{roomId}
+
+
+WAITLIST:
+
+POST /api/waitlist
+GET /api/waitlist
+GET /api/waitlist/{id}
+DELETE /api/waitlist/{id}
+
+
+PAYMENT:
+
+POST /api/payments
+GET /api/payments/{id}
+GET /api/payments/reservation/{reservationId}
+POST /api/payments/{id}/refund
+
+
+BILLING:
+
+POST /api/bills
+GET /api/bills/{id}
+GET /api/bills/reservation/{reservationId}
+POST /api/bills/{id}/items
+POST /api/bills/{id}/calculate
+POST /api/bills/{id}/finalize
+GET /api/bills/{id}/print
+
+
+STAFF:
+
+POST /api/staff
+GET /api/staff
+GET /api/staff/{id}
+PUT /api/staff/{id}
+DELETE /api/staff/{id}
+
+
+ATTENDANCE:
+
+POST /api/attendance
+GET /api/attendance
+GET /api/attendance/staff/{staffId}
+
+
+SHIFTS:
+
+POST /api/shifts
+GET /api/shifts
+GET /api/shifts/{id}
+PUT /api/shifts/{id}
+DELETE /api/shifts/{id}
+
+
+LEAVE:
+
+POST /api/leave
+GET /api/leave
+GET /api/leave/{id}
+PUT /api/leave/{id}
+
+
+INVENTORY:
+
+POST /api/inventory
+GET /api/inventory
+GET /api/inventory/{id}
+PUT /api/inventory/{id}
+DELETE /api/inventory/{id}
+
+POST /api/inventory/{id}/stock-in
+POST /api/inventory/{id}/stock-out
+POST /api/inventory/{id}/adjust
+
+GET /api/inventory/{id}/movements
+GET /api/inventory/low-stock
+
+
+SERVICE REQUESTS:
+
+POST /api/service-requests
+GET /api/service-requests/{id}
+GET /api/service-requests/reservation/{reservationId}
+GET /api/service-requests/guest/{guestId}
+POST /api/service-requests/{id}/cancel
+
+
+HOUSEKEEPING:
+
+GET /api/housekeeping/tasks/my
+GET /api/housekeeping/tasks/{id}
+POST /api/housekeeping/tasks/{id}/accept
+POST /api/housekeeping/tasks/{id}/start
+POST /api/housekeeping/tasks/{id}/complete
+POST /api/housekeeping/tasks/{id}/reject
+
+
+ROOM ASSIGNMENTS:
+
+POST /api/room-assignments
+GET /api/room-assignments
+GET /api/room-assignments/{id}
+PUT /api/room-assignments/{id}
+DELETE /api/room-assignments/{id}
+
+
+MAINTENANCE:
+
+Create appropriate REST APIs for:
+
+- create issue
+- list issues
+- view issue
+- assign issue
+- start issue
+- resolve issue
+- inspect issue
+- close issue
+
+
+BREAKAGE:
+
+Create APIs for:
+
+- report breakage
+- view breakage
+- approve
+- reject
+
+
+EXPENSES:
+
+Create APIs for:
+
+- create
+- list
+- view
+- update
+- approve where applicable
+
+
+UTILITIES:
+
+Create APIs for:
+
+- create usage
+- list
+- view
+- compare periods
+
+
+CASH DRAWER:
+
+Create APIs for:
+
+- open
+- cash received
+- cash paid
+- adjustment
+- close
+- view
+
+
+SHIFT HANDOVER:
+
+Create APIs for:
+
+- create handover
+- view handover
+- pending items
+- complete handover
+
+
+FEEDBACK:
+
+Create appropriate APIs for:
+
+- create
+- view
+- list
+
+
+COMPLAINTS:
+
+Create APIs for:
+
+- create
+- view
+- assign
+- update
+- resolve
+
+
+LOYALTY:
+
+Create APIs for:
+
+- account
+- balance
+- earn
+- redeem
+- transactions
+
+
+REPORTING:
+
+GET /api/reports/occupancy
+GET /api/reports/revenue
+GET /api/reports/expenses
+GET /api/reports/staff-performance
+GET /api/reports/daily-summary
+
+
+NOTIFICATION:
+
+GET /api/notifications
+GET /api/notifications/{id}
+
+
+=======================================================================
+109. SECURITY MATRIX
+=======================================================================
+
+USER MANAGEMENT:
+
+ADMIN
+
+ROOM/HALL MANAGEMENT:
+
+OWNER
+MANAGER
+
+PRICING:
+
+OWNER
+MANAGER where appropriate
+
+STAFF:
+
+OWNER
+MANAGER
+
+INVENTORY:
+
+OWNER
+MANAGER
+
+RESERVATIONS:
+
+GUEST own
+RECEPTIONIST
+MANAGER
+OWNER
+
+CHECK-IN:
+
+RECEPTIONIST
+MANAGER
+OWNER
+
+CHECK-OUT:
+
+RECEPTIONIST
+MANAGER
+OWNER
+
+REFUND:
+
+ADMIN
+OWNER
+MANAGER according to business authorization
+
+HOUSEKEEPING:
+
+HOUSEKEEPER own assigned tasks
+MANAGER
+OWNER
+
+ROOM ASSIGNMENT:
+
+MANAGER
+OWNER
+
+BREAKAGE APPROVAL:
+
+MANAGER
+OWNER
+
+EXPENSE:
+
+MANAGER
+OWNER
+
+REPORTS:
+
+OWNER
+MANAGER
+ADMIN where appropriate
+
+GUEST DATA:
+
+GUEST own data
+authorized staff
+
+Ensure both:
+
+role-level authorization
+
+AND:
+
+object-level authorization
+
+
+=======================================================================
+110. LOGGING
+=======================================================================
+
+Use:
+
+SLF4J
+Logback
+
+Include:
+
+service name
+correlationId
+traceId where applicable
+
+INFO:
+
+reservation creation
+reservation confirmation
+check-in
+check-out
+payment success
+housekeeping completion
+
+WARN:
+
+low stock
+failed login
+room unavailable
+retry
+fallback
+rejected task
+
+ERROR:
+
+external service failure
+RabbitMQ processing failure
+database failure
+unexpected business failure
+
+Never log sensitive credentials.
+
+
+=======================================================================
+111. ACTUATOR
+=======================================================================
+
+Use Spring Boot Actuator.
+
+Expose appropriate:
+
+health
+info
+relevant metrics
+
+Protect sensitive actuator endpoints.
+
+Actuator should support:
+
+- Docker health verification
+- service health
+- resilience visibility
+
+
+=======================================================================
+112. SWAGGER
+=======================================================================
+
+Every business service must expose Swagger/OpenAPI.
+
+Document:
+
+- APIs
+- DTOs
+- security scheme
+- JWT authentication
+- roles
+- validation
+- errors
+- status codes
+- examples
+
+Swagger is the ONLY API documentation mechanism.
+
+Do not create Postman collections.
+
+
+=======================================================================
+113. PROJECT FOLDER STRUCTURE
+=======================================================================
+
+Root:
+
+hotel-management-system/
+
+├── config-server/
+├── eureka-server/
+├── api-gateway/
+
+├── auth-service/
+├── guest-service/
+├── room-service/
+├── reservation-service/
+├── payment-service/
+├── billing-service/
+├── rate-service/
+├── staff-service/
+├── inventory-service/
+├── guest-experience-service/
+├── operations-service/
+├── reporting-service/
+├── notification-service/
+
+├── config-repo/
+
+├── docs/
+│   ├── architecture/
+│   ├── api/
+│   ├── database/
+│   ├── saga/
+│   └── testing/
+
+├── docker-compose.yml
+└── README.md
+
+
+=======================================================================
+114. BUSINESS SERVICE INTERNAL STRUCTURE
+=======================================================================
+
+Each business service should follow:
+
+service-name/
+
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/hms/<service>/
+│   │   │
+│   │   │       ├── controller/
+│   │   │       ├── service/
+│   │   │       │   └── impl/
+│   │   │       ├── repository/
+│   │   │       ├── entity/
+│   │   │       ├── dto/
+│   │   │       │   ├── request/
+│   │   │       │   └── response/
+│   │   │       ├── mapper/
+│   │   │       ├── exception/
+│   │   │       ├── config/
+│   │   │       ├── security/
+│   │   │       ├── client/
+│   │   │       └── event/
+│   │   │           ├── publisher/
+│   │   │           └── consumer/
+│   │   │
+│   │   └── resources/
+│   │       └── application.yml
+│   │
+│   └── test/
+│       └── java/
+│           └── com/hms/<service>/
+│               ├── controller/
+│               ├── service/
+│               ├── repository/
+│               └── integration/
+│
+├── pom.xml
+└── Dockerfile
+
+
+=======================================================================
+115. CONFIG REPOSITORY
+=======================================================================
+
+config-repo/
+
+application.yml
+
+auth-service.yml
+guest-service.yml
+room-service.yml
+reservation-service.yml
+payment-service.yml
+billing-service.yml
+rate-service.yml
+staff-service.yml
+inventory-service.yml
+guest-experience-service.yml
+operations-service.yml
+reporting-service.yml
+notification-service.yml
+
+Configuration should contain:
+
+- ports
+- datasource
+- Eureka
+- RabbitMQ
+- JWT
+- OpenFeign
+- Resilience4j
+- Actuator
+- logging
+
+Do not hard-code secrets.
+
+
+=======================================================================
+116. DOCKER
+=======================================================================
+
+Create Dockerfiles for every service.
+
+Create Docker Compose containing:
+
+- MySQL
+- RabbitMQ
+- Config Server
+- Eureka
+- API Gateway
+- all business services
+
+Use service names for internal communication.
+
+Do not use hard-coded localhost URLs between containers.
+
+Use environment variables for:
+
+- database credentials
+- JWT secret
+- RabbitMQ connection
+- configurable external values
+
+
+=======================================================================
+117. STARTUP ORDER
+=======================================================================
+
+Logical startup:
+
+1. MySQL
+2. RabbitMQ
+3. Config Server
+4. Eureka
+5. Gateway
+6. Auth
+7. Guest
+8. Room
+9. Rate
+10. Staff
+11. Inventory
+12. Reservation
+13. Payment
+14. Billing
+15. Guest Experience
+16. Operations
+17. Notification
+18. Reporting
+
+
+=======================================================================
+118. DOCKER HEALTH CHECKS
+=======================================================================
+
+Add health checks where practical.
+
+The system must not assume every service is instantly available.
+
+Use resilience and service discovery appropriately.
+
+
+=======================================================================
+119. TRANSACTION MANAGEMENT
+=======================================================================
+
+Use @Transactional only for local service/database transactions.
+
+Do NOT attempt:
+
+distributed @Transactional
+
+Example:
+
+Reservation transaction:
+
+local reservation DB only.
+
+Payment transaction:
+
+local payment DB only.
+
+Billing transaction:
+
+local billing DB only.
+
+Saga coordinates the overall business process.
+
+
+=======================================================================
+120. CONCURRENCY
+=======================================================================
+
+Pay special attention to concurrent operations.
+
+Reservation:
+
+two users booking the same room.
+
+Inventory:
+
+two simultaneous stock-outs.
+
+Payment:
+
+two simultaneous payment requests.
+
+Housekeeping:
+
+two managers assigning same staff/task.
+
+Room status:
+
+multiple workflows attempting transitions.
+
+Use:
+
+- transactions
+- constraints
+- optimistic locking where appropriate
+- idempotency
+- proper business validation
+
+Do not rely only on Java if database-level consistency is required.
+
+
+=======================================================================
+121. AUDIT HISTORY
+=======================================================================
+
+Maintain historical records for important operations.
+
+At minimum:
+
+- payment history
+- refund history
+- stock movement history
+- loyalty transactions
+- service request history
+- housekeeping task history
+- complaint history
+- breakage history
+- cash drawer history
+- shift handover history where appropriate
+
+
+=======================================================================
+122. IMMUTABILITY
+=======================================================================
+
+Finalized:
+
+- bills
+- invoices
+- payments
+- refunds
+
+must not be casually modified.
+
+Inventory movements and loyalty transactions must remain historically
+traceable.
+
+
+=======================================================================
+123. TESTING
+=======================================================================
+
+Use ONLY:
+
+JUnit 5
+Mockito
+Spring Boot Test
+MockMvc/WebTestClient
+
+Do not introduce another test framework.
+
+
+=======================================================================
+124. UNIT TESTS
+=======================================================================
+
+Test service business logic.
+
+AUTH:
+
+- successful login
+- invalid credentials
+- lock
+- role
+
+GUEST:
+
+- creation
+- duplicate member code
+- validation
+
+ROOM:
+
+- creation
+- availability
+- status transition
+- maintenance
+
+RATE:
+
+- base rate
+- weekend
+- holiday
+- occupancy
+- last-minute
+- quote
+
+RESERVATION:
+
+- create
+- confirm
+- cancel
+- check-in
+- checkout
+- no-show
+- transfer
+- upgrade
+- downgrade
+- early check-in
+- late checkout
+- overlap prevention
+
+PAYMENT:
+
+- success
+- failure
+- idempotency
+- refund
+
+BILLING:
+
+- calculation
+- tax
+- charges
+- finalization
+- immutability
+
+HOUSEKEEPING:
+
+- assignment
+- accept
+- start
+- complete
+- reject
+- authorization
+
+SERVICE REQUEST:
+
+- creation
+- assignment
+- status
+- completion
+- cancellation
+- history
+
+INVENTORY:
+
+- stock in
+- stock out
+- insufficient quantity
+- low stock
+
+MAINTENANCE:
+
+- lifecycle
+
+BREAKAGE:
+
+- approval
+- rejection
+
+LOYALTY:
+
+- earning
+- redemption
+- level
+
+SECURITY:
+
+- invalid JWT
+- unauthorized
+- forbidden
+- object ownership
+
+
+=======================================================================
+125. MOCKITO
+=======================================================================
+
+Use Mockito to mock:
+
+- repositories
+- Feign clients
+- RabbitMQ publishers
+- external dependencies
+- notification dependencies
+
+Verify interactions.
+
+Examples:
+
+verify(repository).save(...)
+
+verify(rateClient).getQuote(...)
+
+verify(eventPublisher).publish(...)
+
+
+=======================================================================
+126. CONTROLLER TESTS
+=======================================================================
+
+Use MockMvc/WebTestClient.
+
+Test:
+
+- valid request
+- invalid request
+- authentication
+- authorization
+- status codes
+- response DTO
+- error DTO
+
+
+=======================================================================
+127. REPOSITORY TESTS
+=======================================================================
+
+Test important queries:
+
+- overlapping reservations
+- room availability
+- payment lookup
+- refund eligibility
+- inventory
+- history queries
+
+
+=======================================================================
+128. INTEGRATION TESTS
+=======================================================================
+
+Use Spring Boot Test for important workflows.
+
+Where possible verify:
+
+- database persistence
+- service integration
+- RabbitMQ publishing/consuming
+- Feign interaction
+- security
+
+Do not introduce Testcontainers unless explicitly approved because
+it is not part of the fixed technology stack.
+
+
+=======================================================================
+129. RESILIENCE TESTS
+=======================================================================
+
+Test:
+
+- circuit breaker
+- retry
+- timeout
+- fallback
+- service unavailable
+
+Do not test only the happy path.
+
+
+=======================================================================
+130. END-TO-END BUSINESS WORKFLOW 1
+=======================================================================
+
+LOGIN
+
+Client
+→ Gateway
+→ Auth Service
+→ validate username/password
+→ hash comparison
+→ JWT
+→ response
+
+Future request:
+
+Client
+→ Gateway
+→ JWT
+→ service
+→ role authorization
+
+
+=======================================================================
+131. END-TO-END BUSINESS WORKFLOW 2
+=======================================================================
+
+ROOM SEARCH
+
+Guest/Receptionist
+→ Gateway
+→ Room availability
+→ OpenFeign
+→ Room Service
+→ overlap calculation
+→ Rate Service
+→ quote
+→ response
+
+Response should include:
+
+- room
+- category
+- capacity
+- amenities
+- availability
+- price
+
+
+=======================================================================
+132. END-TO-END BUSINESS WORKFLOW 3
+=======================================================================
+
+RESERVATION
+
+Guest
+→ search
+→ select room
+→ create reservation
+→ Reservation PENDING
+→ check availability
+→ rate quote
+→ payment
+→ PaymentSucceeded
+→ Reservation CONFIRMED
+→ ReservationConfirmed
+→ Notification
+
+
+=======================================================================
+133. END-TO-END BUSINESS WORKFLOW 4
+=======================================================================
+
+CHECK-IN
+
+Receptionist:
+
+reservation CONFIRMED
+→ verify guest
+→ verify room
+→ check room state
+→ reservation CHECKED_IN
+→ room OCCUPIED
+→ ReservationCheckedIn
+
+
+=======================================================================
+134. END-TO-END BUSINESS WORKFLOW 5
+=======================================================================
+
+GUEST SERVICE REQUEST
+
+Guest:
+
+POST /api/service-requests
+
+guest-experience-service:
+
+create PENDING
+
+publish:
+
+ServiceRequestCreated
+
+RabbitMQ
+
+operations-service:
+
+consume event
+→ create HousekeepingTask
+→ find room assignment
+→ assign housekeeper
+→ publish HousekeepingTaskAssigned
+
+notification-service:
+
+notify housekeeper
+
+Housekeeper:
+
+accept
+→ start
+→ complete
+
+operations-service:
+
+HousekeepingTaskCompleted
+
+guest-experience-service:
+
+ServiceRequest COMPLETED
+
+notification-service:
+
+notify guest
+
+
+=======================================================================
+135. END-TO-END BUSINESS WORKFLOW 6
+=======================================================================
+
+CHECKOUT + BILLING + HOUSEKEEPING
+
+Guest:
+
+checkout
+
+Reservation:
+
+validate CHECKED_IN
+
+Billing:
+
+calculate final bill
+
+Include:
+
+room charge
+service charges
+tax
+discount
+breakage
+late checkout
+upgrade/downgrade adjustment
+
+Payment:
+
+collect outstanding amount
+
+If successful:
+
+Reservation CHECKED_OUT
+
+publish:
+
+ReservationCheckedOut
+
+Room:
+
+OCCUPIED
+→ DIRTY
+
+Operations:
+
+create checkout cleaning task
+
+assign housekeeper
+
+Housekeeper:
+
+ACCEPTED
+→ IN_PROGRESS
+→ COMPLETED
+
+Room:
+
+DIRTY
+→ CLEANING
+→ CLEAN
+
+Verification:
+
+CLEAN
+→ AVAILABLE
+
+publish:
+
+RoomAvailable
+
+
+=======================================================================
+136. END-TO-END BUSINESS WORKFLOW 7
+=======================================================================
+
+BREAKAGE
+
+Housekeeper:
+
+report damage
+
+Operations:
+
+REPORTED
+
+Manager:
+
+review
+
+APPROVED
+
+publish:
+
+BreakageApproved
+
+Billing:
+
+add charge
+
+Notification:
+
+notify appropriate user
+
+
+=======================================================================
+137. END-TO-END BUSINESS WORKFLOW 8
+=======================================================================
+
+MAINTENANCE
+
+Guest/staff:
+
+report issue
+
+OPEN
+
+Manager:
+
+assign
+
+ASSIGNED
+
+Staff:
+
+IN_PROGRESS
+
+Resolve:
+
+RESOLVED
+
+Inspection:
+
+INSPECTION
+
+If passed:
+
+AVAILABLE
+
+
+=======================================================================
+138. END-TO-END BUSINESS WORKFLOW 9
+=======================================================================
+
+LOW STOCK
+
+Stock-out
+
+→ quantity reduced
+
+→ threshold reached
+
+→ LowStockDetected
+
+→ RabbitMQ
+
+→ Notification Service
+
+→ Manager/Owner notification
+
+
+=======================================================================
+139. END-TO-END BUSINESS WORKFLOW 10
+=======================================================================
+
+WAITLIST
+
+Requested room unavailable
+
+→ create waitlist
+
+Room becomes available
+
+→ RoomAvailable
+
+→ find eligible waitlist
+
+→ notify
+
+→ user/receptionist can create reservation
+
+
+=======================================================================
+140. END-TO-END BUSINESS WORKFLOW 11
+=======================================================================
+
+NO-SHOW
+
+Confirmed reservation
+
+→ expected arrival
+
+→ grace period
+
+→ NO_SHOW
+
+→ release room
+
+→ policy charges if applicable
+
+→ event
+
+→ notification
+
+
+=======================================================================
+141. END-TO-END BUSINESS WORKFLOW 12
+=======================================================================
+
+ROOM TRANSFER
+
+Guest requests transfer
+
+→ check current reservation
+→ target room availability
+→ rate difference
+→ authorization
+→ update reservation
+→ release old room
+→ assign new room
+→ billing adjustment
+→ event
+→ notification
+
+
+=======================================================================
+142. END-TO-END BUSINESS WORKFLOW 13
+=======================================================================
+
+ROOM UPGRADE
+
+Request upgrade
+
+→ higher category availability
+→ price difference
+→ authorization
+→ reservation update
+→ billing charge
+→ notification
+
+
+=======================================================================
+143. END-TO-END BUSINESS WORKFLOW 14
+=======================================================================
+
+ROOM DOWNGRADE
+
+Request downgrade
+
+→ lower category availability
+→ calculate price difference
+→ authorization
+→ reservation update
+→ refund/credit/adjustment policy
+→ billing
+→ notification
+
+
+=======================================================================
+144. END-TO-END BUSINESS WORKFLOW 15
+=======================================================================
+
+DAILY SUMMARY
+
+Scheduled Spring task
+
+→ reporting read model
+
+→ aggregate:
+
+arrivals
+departures
+occupancy
+revenue
+expenses
+maintenance
+complaints
+low stock
+reservations
+no-shows
+pending requests
+
+→ DailySummaryGenerated
+
+→ notification record for Owner/Manager
+
+
+=======================================================================
+145. ORIGINAL REQUIREMENT: ERROR RECOVERY
+=======================================================================
+
+The original HMS objective emphasizes:
+
+- easy use
+- error recovery
+- efficiency
+- information retrieval
+- safety
+- user satisfaction
+
+Therefore:
+
+Do not return cryptic technical exceptions.
+
+Provide:
+
+- clear validation errors
+- meaningful business errors
+- controlled external-service errors
+- retry/fallback where safe
+- trace/correlation ID
+- useful logs
+
+
+=======================================================================
+146. ORIGINAL REQUIREMENT: ADMINISTRATION
+=======================================================================
+
+Administration functionality must be represented by:
+
+ADMIN
+OWNER
+MANAGER
+
+with clear authorization boundaries.
+
+Do not simply make every user ADMIN.
+
+
+=======================================================================
+147. ORIGINAL REQUIREMENT: ROOM SERVICES
+=======================================================================
+
+Room services from the original scope are represented through:
+
+guest-experience-service
++
+operations-service
+
+Examples:
+
+- food order
+- laundry
+- towels
+- cleaning
+- maintenance
+- amenities
+- special request
+
+Do not create another service.
+
+
+=======================================================================
+148. ORIGINAL REQUIREMENT: INVENTORY ALERTS
+=======================================================================
+
+Inventory threshold detection must be automatic.
+
+Do not require Manager to manually check quantity every time.
+
+Use:
+
+Stock movement
+→ quantity update
+→ threshold detection
+→ LowStockDetected
+→ notification
+
+
+=======================================================================
+149. ORIGINAL REQUIREMENT: REPORTS
+=======================================================================
+
+Reports must cover at least:
+
+- staff payment/salary-related report where authorized
+- income/revenue
+- occupancy
+- expenses
+- staff performance
+- daily summary
+- revenue trends
+- peak booking periods
+
+
+=======================================================================
+150. GIT / PROJECT VERSION CONTROL
+=======================================================================
+
+The original document includes Git workflow requirements.
+
+Since this is an individual project, do NOT create team branch
+instructions.
+
+However:
+
+Maintain the project cleanly in Git.
+
+Do not commit:
+
+- passwords
+- JWT secrets
+- database credentials
+- generated target directories
+- IDE-specific files
+- unnecessary temporary files
+
+Use meaningful commit messages if Git history is being maintained.
+
+Examples:
+
+feat: implement room availability
+
+feat: implement reservation cancellation
+
+feat: add housekeeping workflow
+
+fix: prevent overlapping reservations
+
+test: add payment idempotency tests
+
+docs: update Swagger documentation
+
+
+=======================================================================
+151. README
+=======================================================================
+
+README must explain:
+
+1. Project overview
+2. Business objectives
+3. Architecture
+4. Microservices
+5. Roles
+6. Databases
+7. REST/OpenFeign
+8. RabbitMQ
+9. Saga
+10. Security
+11. Resilience4j
+12. Validation
+13. Exception handling
+14. Logging
+15. Actuator
+16. Swagger
+17. Testing
+18. Docker
+19. Configuration
+20. Startup order
+21. Demo workflow
+22. Troubleshooting
+
+
+=======================================================================
+152. ARCHITECTURE DOCUMENTATION
+=======================================================================
+
+Create/update docs/architecture.
+
+Document:
+
+- microservices
+- service ownership
+- database ownership
+- communication
+- Gateway
+- Eureka
+- Config Server
+- RabbitMQ
+- OpenFeign
+- Saga
+- security flow
+- room lifecycle
+- reservation lifecycle
+- housekeeping lifecycle
+
+
+=======================================================================
+153. DATABASE DOCUMENTATION
+=======================================================================
+
+Create/update docs/database.
+
+Document:
+
+- database per service
+- tables
+- primary keys
+- internal foreign keys
+- logical cross-service IDs
+- indexes
+- important constraints
+- important state fields
+
+
+=======================================================================
+154. SAGA DOCUMENTATION
+=======================================================================
+
+Create/update docs/saga.
+
+Document:
+
+- reservation Saga
+- payment success
+- payment failure
+- compensation
+- cancellation/refund
+- correlationId
+- idempotency
+
+
+=======================================================================
+155. TESTING DOCUMENTATION
+=======================================================================
+
+Create/update docs/testing.
+
+Document:
+
+- unit tests
+- Mockito
+- controller tests
+- repository tests
+- integration tests
+- resilience tests
+- end-to-end workflows
+
+
+=======================================================================
+156. DEFINITION OF DONE
+=======================================================================
+
+A service is NOT considered complete until:
+
+[ ] service starts
+
+[ ] Config Server integration works
+
+[ ] Eureka registration works
+
+[ ] database configuration works
+
+[ ] entities implemented
+
+[ ] repositories implemented
+
+[ ] service layer implemented
+
+[ ] controllers implemented
+
+[ ] DTOs implemented
+
+[ ] validation implemented
+
+[ ] exception handling implemented
+
+[ ] security implemented where required
+
+[ ] OpenFeign implemented where required
+
+[ ] RabbitMQ implemented where required
+
+[ ] Resilience4j implemented where required
+
+[ ] Swagger implemented
+
+[ ] Actuator works
+
+[ ] unit tests exist
+
+[ ] important business rules tested
+
+[ ] Dockerfile builds
+
+[ ] service works through Gateway
+
+[ ] README/documentation updated
+
+
+=======================================================================
+157. COMPLETE PROJECT VERIFICATION
+=======================================================================
+
+Before declaring completion, verify all of the following.
+
+TECHNOLOGY:
+
+[ ] Java 21
+[ ] Spring Boot 4
+[ ] Spring Cloud
+[ ] MySQL
+[ ] RabbitMQ
+[ ] OpenFeign
+[ ] Config Server
+[ ] Eureka
+[ ] Gateway
+[ ] Spring Security
+[ ] JWT
+[ ] Resilience4j
+[ ] Jakarta Validation
+[ ] SLF4J
+[ ] Logback
+[ ] Actuator
+[ ] Swagger/OpenAPI
+[ ] JUnit 5
+[ ] Mockito
+[ ] Docker
+[ ] Docker Compose
+
+
+ARCHITECTURE:
+
+[ ] exactly 16 services
+[ ] no housekeeping-service
+[ ] no email-service
+[ ] no sms-service
+[ ] no Kafka
+[ ] no Redis
+[ ] no MongoDB
+[ ] no PostgreSQL
+[ ] no Kubernetes
+[ ] no MapStruct
+[ ] no Flyway
+[ ] no Liquibase
+[ ] no Postman
+[ ] no direct cross-service DB access
+
+
+SECURITY:
+
+[ ] JWT generation
+[ ] JWT validation
+[ ] gateway authentication
+[ ] service authentication
+[ ] role authorization
+[ ] object-level authorization
+[ ] account locking
+[ ] password hashing
+[ ] no sensitive logs
+
+
+DATABASE:
+
+[ ] database-per-service
+[ ] proper primary keys
+[ ] proper indexes
+[ ] unique constraints
+[ ] timestamps
+[ ] internal foreign keys only
+[ ] logical cross-service IDs
+[ ] transaction history
+[ ] immutable finalized financial data
+
+
+BUSINESS:
+
+[ ] guest
+[ ] room
+[ ] room category
+[ ] amenities
+[ ] hall/resource
+[ ] room search
+[ ] pricing
+[ ] dynamic pricing
+[ ] reservation
+[ ] cancellation
+[ ] modification
+[ ] check-in
+[ ] check-out
+[ ] no-show
+[ ] waitlist
+[ ] room transfer
+[ ] room upgrade
+[ ] room downgrade
+[ ] early check-in
+[ ] late checkout
+[ ] payment
+[ ] refund
+[ ] billing
+[ ] staff
+[ ] attendance
+[ ] shifts
+[ ] leave
+[ ] inventory
+[ ] low-stock
+[ ] service requests
+[ ] QR room service
+[ ] special requests
+[ ] feedback
+[ ] complaints
+[ ] loyalty
+[ ] housekeeping
+[ ] housekeeper assignments
+[ ] maintenance
+[ ] breakage
+[ ] expenses
+[ ] utilities
+[ ] cash drawer
+[ ] shift handover
+[ ] reports
+[ ] daily summary
+[ ] notifications
+
+
+COMMUNICATION:
+
+[ ] OpenFeign synchronous calls
+[ ] RabbitMQ events
+[ ] event IDs
+[ ] correlation IDs
+[ ] idempotent consumers
+[ ] Saga
+[ ] compensation
+[ ] resilience
+
+
+TESTING:
+
+[ ] JUnit 5
+[ ] Mockito
+[ ] service unit tests
+[ ] controller tests
+[ ] repository tests
+[ ] security tests
+[ ] messaging tests
+[ ] resilience tests
+[ ] integration tests
+[ ] end-to-end verification
+
+
+DEPLOYMENT:
+
+[ ] Dockerfiles
+[ ] Docker Compose
+[ ] health checks
+[ ] configuration
+[ ] environment variables
+[ ] service names
+[ ] startup order
+
+
+DOCUMENTATION:
+
+[ ] README
+[ ] architecture documentation
+[ ] database documentation
+[ ] Saga documentation
+[ ] testing documentation
+[ ] Swagger/OpenAPI
+[ ] demo workflow
+
+
+=======================================================================
+158. FINAL END-TO-END DEMONSTRATION
+=======================================================================
+
+After implementation, verify the following complete demonstration.
+
+SCENARIO:
+
+1. ADMIN creates user accounts.
+
+2. OWNER logs in.
+
+3. OWNER receives JWT.
+
+4. OWNER creates room categories.
+
+5. OWNER creates amenities.
+
+6. OWNER creates rooms.
+
+7. OWNER creates halls/resources where applicable.
+
+8. OWNER configures base rates.
+
+9. OWNER configures dynamic pricing.
+
+10. MANAGER creates staff.
+
+11. MANAGER assigns shifts.
+
+12. MANAGER creates Housekeeper room-range assignments.
+
+13. Receptionist creates guest.
+
+14. Guest logs in.
+
+15. Guest receives JWT.
+
+16. Guest searches rooms.
+
+17. Reservation-service calls Room Service through OpenFeign.
+
+18. Room availability is calculated based on dates.
+
+19. Reservation-service calls Rate Service through OpenFeign.
+
+20. Dynamic pricing is calculated.
+
+21. Guest selects room.
+
+22. Reservation is created as PENDING.
+
+23. Payment is created.
+
+24. Payment succeeds.
+
+25. PaymentSucceeded is published.
+
+26. Reservation becomes CONFIRMED.
+
+27. ReservationConfirmed is published.
+
+28. Notification-service creates confirmation notification.
+
+29. Guest arrives.
+
+30. Receptionist performs check-in.
+
+31. Reservation becomes CHECKED_IN.
+
+32. Room becomes OCCUPIED.
+
+33. Guest requests extra towels.
+
+34. ServiceRequest is created.
+
+35. ServiceRequestCreated is published.
+
+36. Operations-service creates HousekeepingTask.
+
+37. Housekeeper is identified from room assignment.
+
+38. HousekeepingTaskAssigned is published.
+
+39. Housekeeper receives notification.
+
+40. Housekeeper accepts task.
+
+41. Housekeeper starts task.
+
+42. Housekeeper delivers towels.
+
+43. Housekeeper completes task.
+
+44. ServiceRequest becomes COMPLETED.
+
+45. Guest requests late checkout.
+
+46. System checks eligibility.
+
+47. Late checkout charge is calculated.
+
+48. Billing is updated.
+
+49. Guest checks out.
+
+50. Billing calculates final bill.
+
+51. Breakage/service/late checkout/upgrade charges are included where
+applicable.
+
+52. Outstanding payment is processed.
+
+53. Reservation becomes CHECKED_OUT.
+
+54. ReservationCheckedOut is published.
+
+55. Room becomes DIRTY.
+
+56. Housekeeping task is automatically created.
+
+57. Housekeeper is assigned.
+
+58. Housekeeper accepts.
+
+59. Room becomes CLEANING.
+
+60. Housekeeper completes cleaning.
+
+61. Room becomes CLEAN.
+
+62. Manager verifies.
+
+63. Room becomes AVAILABLE.
+
+64. RoomAvailable event is published.
+
+65. Waitlist processing can react.
+
+66. Reporting service updates occupancy/revenue.
+
+67. Daily summary is generated.
+
+68. Owner/Manager receives notification record.
+
+
+=======================================================================
+159. FAILURE DEMONSTRATIONS
+=======================================================================
+
+Verify these scenarios:
+
+1. Invalid login.
+
+2. Account lock.
+
+3. Guest accesses another guest's reservation.
+
+4. Housekeeper accesses another housekeeper's task.
+
+5. Invalid reservation dates.
+
+6. Double booking attempt.
+
+7. Room under maintenance.
+
+8. Room out of service.
+
+9. Payment failure.
+
+10. Duplicate payment request.
+
+11. Invalid refund.
+
+12. Refund exceeding paid amount.
+
+13. Duplicate RabbitMQ event.
+
+14. RabbitMQ consumer failure.
+
+15. Room Service unavailable.
+
+16. Rate Service unavailable.
+
+17. OpenFeign timeout.
+
+18. Circuit breaker opens.
+
+19. Inventory below threshold.
+
+20. Housekeeper not assigned.
+
+21. Housekeeper off shift.
+
+22. Invalid room state transition.
+
+23. Invalid reservation state transition.
+
+24. Unauthorized refund.
+
+25. Unauthorized rate update.
+
+26. Unauthorized breakage approval.
+
+27. Finalized bill modification attempt.
+
+28. Invalid room transfer.
+
+29. Invalid room upgrade.
+
+30. Invalid room downgrade.
+
+
+=======================================================================
+160. CODE QUALITY RULES
+=======================================================================
+
+Use:
+
+- constructor injection
+- meaningful names
+- clean service interfaces
+- implementation classes
+- focused methods
+- DTOs
+- explicit mapping
+- proper exception handling
+- consistent package naming
+- Lombok where useful
+
+Avoid:
+
+- field injection
+- giant controllers
+- giant service classes
+- business logic in controllers
+- direct entity exposure
+- duplicate business logic
+- hard-coded secrets
+- hard-coded service URLs
+- cross-service DB access
+- unnecessary abstractions
+- unnecessary technologies
+
+
+=======================================================================
+161. EXISTING PROJECT ANALYSIS PROCEDURE
+=======================================================================
+
+Before modifying anything:
+
+STEP 1:
+
+Inspect the complete repository.
+
+STEP 2:
+
+Inspect every pom.xml.
+
+STEP 3:
+
+Inspect all application configuration.
+
+STEP 4:
+
+Inspect Config Server.
+
+STEP 5:
+
+Inspect Eureka.
+
+STEP 6:
+
+Inspect Gateway.
+
+STEP 7:
+
+Inspect every business service.
+
+STEP 8:
+
+Inspect entities.
+
+STEP 9:
+
+Inspect repositories.
+
+STEP 10:
+
+Inspect DTOs.
+
+STEP 11:
+
+Inspect controllers.
+
+STEP 12:
+
+Inspect services.
+
+STEP 13:
+
+Inspect security.
+
+STEP 14:
+
+Inspect Feign clients.
+
+STEP 15:
+
+Inspect RabbitMQ.
+
+STEP 16:
+
+Inspect exception handling.
+
+STEP 17:
+
+Inspect tests.
+
+STEP 18:
+
+Inspect Docker.
+
+STEP 19:
+
+Inspect README/docs.
+
+STEP 20:
+
+Build the existing project before major changes.
+
+Then classify:
+
+A. Correct
+B. Incomplete
+C. Incorrect
+D. Missing
+E. Duplicate
+F. Security risk
+G. Architecture violation
+H. Integration problem
+I. Testing gap
+
+
+=======================================================================
+162. IMPLEMENTATION ORDER
+=======================================================================
+
+Follow this order.
+
+PHASE 0:
+
+Requirement and architecture freeze.
+
+Freeze:
+
+- service boundaries
+- roles
+- entity names
+- status names
+- event names
+- endpoint naming
+- database ownership
+- communication strategy
+
+
+PHASE 1:
+
+Infrastructure
+
+- Config Server
+- Eureka
+- Gateway
+
+
+PHASE 2:
+
+Security
+
+- Auth
+- users
+- roles
+- JWT
+- authorization
+- account lock
+
+
+PHASE 3:
+
+Master Data
+
+- Guest
+- Room
+- Room Category
+- Amenities
+- Halls/resources
+- Staff
+- Inventory
+- Rate
+
+
+PHASE 4:
+
+Reservation
+
+- search
+- availability
+- reservation
+- modification
+- cancellation
+- waitlist
+- no-show
+- check-in
+- checkout
+- transfer
+- upgrade
+- downgrade
+- early check-in
+- late checkout
+
+
+PHASE 5:
+
+Financial
+
+- Payment
+- Refund
+- Billing
+- dynamic pricing integration
+
+
+PHASE 6:
+
+Saga/Event Architecture
+
+- RabbitMQ
+- Reservation events
+- Payment events
+- Saga
+- compensation
+- idempotency
+
+
+PHASE 7:
+
+Guest Experience
+
+- Service requests
+- QR requests
+- Special requests
+- Feedback
+- Complaints
+- Loyalty
+
+
+PHASE 8:
+
+Operations
+
+- Housekeeping
+- Housekeeper assignment
+- Maintenance
+- Breakage
+- Expenses
+- Utilities
+- Cash drawer
+- Shift handover
+
+
+PHASE 9:
+
+Notifications
+
+- event consumers
+- notification records
+- alerts
+
+
+PHASE 10:
+
+Reporting
+
+- occupancy
+- revenue
+- expenses
+- staff performance
+- daily summary
+
+
+PHASE 11:
+
+Quality
+
+- validation
+- exceptions
+- security
+- logging
+- resilience
+- tests
+- Swagger
+
+
+PHASE 12:
+
+Deployment
+
+- Dockerfiles
+- Docker Compose
+- configuration
+- health checks
+
+
+PHASE 13:
+
+Final verification
+
+- build
+- test
+- startup
+- integration
+- end-to-end workflows
+- failure scenarios
+
+
+=======================================================================
+163. IMPORTANT IMPLEMENTATION RULE
+=======================================================================
+
+Do not stop after creating:
+
+- entities
+- DTOs
+- repositories
+- controllers
+- interfaces
+
+Implement the actual logic.
+
+For every major feature, wire:
+
+Controller
+→ Service
+→ Repository
+
+and where necessary:
+
+Service
+→ OpenFeign
+
+and/or:
+
+Service
+→ RabbitMQ publisher
+
+and:
+
+RabbitMQ
+→ Consumer
+→ Service
+
+
+=======================================================================
+164. NO FALSE IMPLEMENTATION
+=======================================================================
+
+Do not claim:
+
+"RabbitMQ implemented"
+
+unless:
+
+- RabbitMQ dependency exists
+- configuration exists
+- publisher exists
+- exchange/queue/routing is configured
+- consumer exists where needed
+- event is actually triggered
+- consumer processes it
+- idempotency is handled where needed
+
+Do not claim:
+
+"OpenFeign implemented"
+
+unless actual Feign clients are wired into business logic.
+
+Do not claim:
+
+"Security implemented"
+
+unless endpoints actually enforce authentication and authorization.
+
+Do not claim:
+
+"Housekeeping implemented"
+
+unless task creation, assignment, status transitions, authorization,
+and room workflow actually work.
+
+
+=======================================================================
+165. FINAL BUILD VERIFICATION
+=======================================================================
+
+Run the appropriate Maven build/test process.
+
+Fix:
+
+- compilation errors
+- dependency errors
+- Spring configuration errors
+- bean creation errors
+- Feign errors
+- RabbitMQ configuration errors
+- database errors
+- security errors
+- test failures
+
+Repeat until the project is in a stable state.
+
+If something genuinely cannot be verified, clearly identify it.
+
+
+=======================================================================
+166. FINAL RESPONSE FROM ANTIGRAVITY
+=======================================================================
+
+After completing implementation, provide a detailed final report.
+
+Include:
+
+1. Existing project analysis.
+
+2. Existing functionality preserved.
+
+3. Missing functionality implemented.
+
+4. Incorrect functionality fixed.
+
+5. Architecture changes.
+
+6. Complete 16-service list.
+
+7. Database list.
+
+8. Tables/entities implemented.
+
+9. REST APIs implemented.
+
+10. OpenFeign clients implemented.
+
+11. RabbitMQ events implemented.
+
+12. RabbitMQ consumers implemented.
+
+13. Saga workflow implemented.
+
+14. Compensation workflows.
+
+15. JWT security.
+
+16. Role authorization.
+
+17. Object-level authorization.
+
+18. Housekeeping.
+
+19. Housekeeper room assignment.
+
+20. Guest service requests.
+
+21. QR room service.
+
+22. Feedback.
+
+23. Complaints.
+
+24. Loyalty.
+
+25. Maintenance.
+
+26. Breakage.
+
+27. Expenses.
+
+28. Utilities.
+
+29. Cash drawer.
+
+30. Shift handover.
+
+31. Dynamic pricing.
+
+32. Hall reservation.
+
+33. Early checkout/check-in.
+
+34. Late checkout.
+
+35. Room transfer.
+
+36. Upgrade/downgrade.
+
+37. Waitlist.
+
+38. No-show.
+
+39. Payment/refund.
+
+40. Billing.
+
+41. Reporting.
+
+42. Daily summary.
+
+43. Notifications.
+
+44. Resilience4j.
+
+45. Logging.
+
+46. Actuator.
+
+47. Swagger.
+
+48. JUnit 5 tests.
+
+49. Mockito tests.
+
+50. Integration tests.
+
+51. Docker.
+
+52. Docker Compose.
+
+53. README.
+
+54. Important files changed.
+
+55. Commands to run.
+
+56. Tests executed and results.
+
+57. End-to-end scenarios verified.
+
+58. Failure scenarios verified.
+
+59. Remaining limitations.
+
+60. Assumptions made.
+
+
+=======================================================================
+167. FINAL ABSOLUTE REQUIREMENTS
+=======================================================================
+
+The final application MUST:
+
+- use Java 21
+- use Spring Boot 4
+- use MySQL
+- use RabbitMQ
+- use OpenFeign
+- use Config Server
+- use Eureka
+- use Gateway
+- use Spring Security
+- use JWT
+- use Resilience4j
+- use Jakarta Validation
+- use SLF4J/Logback
+- use Actuator
+- use Swagger/OpenAPI
+- use JUnit 5
+- use Mockito
+- use Docker/Docker Compose
+
+The final application MUST NOT:
+
+- use Kafka
+- use Redis
+- use MongoDB
+- use PostgreSQL
+- use Kubernetes
+- use MapStruct
+- use Flyway
+- use Liquibase
+- use Postman
+- create housekeeping-service
+- create email-service
+- create sms-service
+- create unnecessary services
+- directly access another service's database
+- expose JPA entities
+- store plaintext passwords
+- store raw card information
+- log JWT/password/card data
+- blindly retry payment operations
+
+
+=======================================================================
+168. FINAL ARCHITECTURAL PRINCIPLE
+=======================================================================
+
+The system must follow this architecture:
+
+                    CLIENT
+                       |
+                       v
+                API GATEWAY
+                       |
+            +----------+----------+
+            |                     |
+            v                     v
+       JWT SECURITY          ROUTING
+            |
+            v
+       MICROSERVICES
+            |
+     +------+------+
+     |             |
+     v             v
+ OPENFEIGN      RABBITMQ
+ (SYNC)          (ASYNC)
+     |             |
+     v             v
+ MICROSERVICE   EVENTS
+                   |
+                   v
+              CONSUMERS
+                   |
+                   v
+             BUSINESS ACTION
+
+
+Each business service owns its own:
+
+- database
+- entities
+- repository
+- business logic
+
+Cross-service communication happens through:
+
+REST + OpenFeign
+
+or:
+
+RabbitMQ
+
+
+=======================================================================
+169. FINAL BUSINESS PRINCIPLE
+=======================================================================
+
+The most important business workflows must remain consistent:
+
+Reservation
+→ Payment
+→ Confirmation
+
+Reservation
+→ Check-in
+→ Occupied
+
+Checkout
+→ Billing
+→ Payment
+→ Checked-out
+→ Dirty
+→ Housekeeping
+→ Clean
+→ Available
+
+Guest Request
+→ Service Request
+→ Housekeeping Task
+→ Housekeeper
+→ Completion
+
+Maintenance
+→ Issue
+→ Assignment
+→ Work
+→ Resolution
+→ Inspection
+→ Available
+
+Breakage
+→ Report
+→ Manager Approval
+→ Billing Charge
+
+Inventory
+→ Stock Movement
+→ Threshold
+→ Low Stock Event
+→ Notification
+
+Waitlist
+→ Room Available
+→ Eligible Guest
+→ Notification
+
+All distributed workflows must have:
+
+- correlationId
+- eventId
+- idempotency
+- proper error handling
+- compensation where necessary
+
+
+=======================================================================
+170. FINAL INSTRUCTION TO ANTIGRAVITY
+=======================================================================
+
+Treat this entire prompt as the final functional and architectural
+specification for the project.
+
+First inspect the existing project.
+
+Do not assume that the current code is correct.
+
+Do not assume that missing features do not need implementation.
+
+Do not rewrite valid functionality unnecessarily.
+
+Implement all required original HMS functionality.
+
+Implement all enhanced HMS functionality.
+
+Maintain the 16-service architecture.
+
+Keep Housekeeping inside operations-service.
+
+Keep Service Requests inside guest-experience-service.
+
+Use OpenFeign for synchronous communication.
+
+Use RabbitMQ for asynchronous communication.
+
+Use Saga for distributed business transactions.
+
+Use MySQL database-per-service.
+
+Use JWT security.
+
+Use Resilience4j for remote-service fault tolerance.
+
+Use JUnit 5 + Mockito for testing.
+
+Use Swagger/OpenAPI ONLY for API documentation.
+
+Do not introduce technologies outside the approved stack.
+
+Do not create unnecessary microservices.
+
+Do not create a team-based workflow because this is an individual
+project.
+
+Do not stop at skeleton code.
+
+Implement actual business logic.
+
+Persist actual data.
+
+Implement actual APIs.
+
+Implement actual RabbitMQ publishers and consumers.
+
+Implement actual OpenFeign calls.
+
+Implement actual security.
+
+Implement actual validation.
+
+Implement actual exception handling.
+
+Implement actual resilience.
+
+Implement actual tests.
+
+Implement actual Docker configuration.
+
+Build the project.
+
+Run tests.
+
+Fix failures.
+
+Verify end-to-end workflows.
+
+Only then provide the final implementation report.
+
+The final objective is:
+
+A COMPLETE, SECURE, TESTED, DOCUMENTED, DOCKERIZABLE, RUNNABLE
+ONLINE HOTEL MANAGEMENT SYSTEM IMPLEMENTED USING THE EXACT TECHNOLOGY
+STACK AND MICROSERVICE ARCHITECTURE SPECIFIED IN THIS PROMPT.
+
+
+=======================================================================
+END OF FINAL MASTER PROMPT
+=======================================================================

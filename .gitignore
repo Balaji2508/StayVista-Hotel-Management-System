@@ -1,0 +1,19 @@
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+# Maven / Java
+target/
+*.class
+*.jar
+*.war
+hs_err_pid*.log
+replay_pid*.log
+
+# IDE
+.metadata/
+.settings/
+.vscode/
+.idea/
+*.iml

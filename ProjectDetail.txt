@@ -1,0 +1,514 @@
+====================================================================================================
+               HOTEL MANAGEMENT SYSTEM (HMS) - ENTERPRISE MICROSERVICES ARCHITECTURE
+                                COMPLETE SYSTEM SPECIFICATION & WORKFLOW MANUAL
+====================================================================================================
+
+DOCUMENT OVERVIEW:
+This document contains the complete, exhaustive reference for the Hotel Management System (HMS).
+It details the system architecture, microservices catalog, role definitions, security & RBAC matrix,
+end-to-end business workflows, inter-service event communication, and concrete request/response examples.
+
+====================================================================================================
+1. PROJECT OVERVIEW & ARCHITECTURAL FOUNDATION
+====================================================================================================
+
+1.1 Domain Summary:
+The Hotel Management System (HMS) is an enterprise-grade, distributed microservices platform designed
+to manage the entire operational lifecycle of hotel and hospitality chains. It coordinates guest
+reservations, room inventory, dining & guest experience, housekeeping & maintenance operations,
+staff administration & time tracking, procurement & vendor logistics, billing & payments, reporting,
+and automated real-time event-driven notifications.
+
+1.2 Technology Stack:
+- Runtime & Core: Java 21 (LTS), Spring Boot 3.2+
+- Microservices Framework: Spring Cloud (2023.x Release Train)
+- Service Discovery: Spring Cloud Netflix Eureka (`eureka-server` on port 8761)
+- API Gateway: Spring Cloud Gateway (`api-gateway` on port 8080) with route-level security
+- Centralized Configuration: Spring Cloud Config Server (`config-server` on port 8888) with Git/Local config-repo
+- Inter-Service RPC: Spring Cloud OpenFeign with Resilience4j Circuit Breakers & Fallbacks
+- Asynchronous Messaging: RabbitMQ Message Broker (`hms.events.exchange` Topic Exchange)
+- Security: Spring Security 6.x + Stateless JWT Authentication (HMAC-SHA512 with 512-bit key)
+- Database & Persistence: MySQL 8.x per-service database pattern with Spring Data JPA & Hibernate
+- Documentation: SpringDoc OpenAPI 3.0 / Swagger UI on every microservice
+
+1.3 System Network & Port Allocation Map:
++--------------------------+------+--------------------+-----------------------------------------------+
+| Microservice Name        | Port | Database Schema    | Primary Business Responsibility               |
++--------------------------+------+--------------------+-----------------------------------------------+
+| api-gateway              | 8080 | N/A (Stateless)    | Single entry point, routing, rate limiting    |
+| eureka-server            | 8761 | N/A (In-Memory)    | Dynamic service registry & heartbeats         |
+| config-server            | 8888 | N/A (config-repo)  | Centralized external application properties   |
+| auth-service             | 8081 | hms_auth_db        | User identity, authentication, JWT generation |
+| guest-service            | 8082 | hms_guest_db       | Guest profiles, loyalty, identity verification|
+| room-service             | 8083 | hms_room_db        | Room catalog, physical inventory, room status |
+| reservation-service      | 8084 | hms_reservation_db | Booking, check-in, check-out, room allocation |
+| payment-service          | 8085 | hms_payment_db     | Payment gateway, card/cash/UPI, refunds       |
+| billing-service          | 8086 | hms_billing_db     | Folio management, invoices, tax, finalization |
+| rate-service             | 8087 | hms_rate_db        | Dynamic room pricing, seasonal multipliers    |
+| staff-service            | 8088 | hms_staff_db       | HR, employees, shifts, clock-in/out, leaves   |
+| inventory-service        | 8089 | hms_inventory_db   | Hotel warehouse stock, threshold alerts       |
+| guest-experience-service | 8090 | hms_experience_db  | Dining, room service, spa, guest feedback     |
+| operations-service       | 8091 | hms_operations_db  | Housekeeping tasks, maintenance work orders   |
+| reporting-service        | 8092 | hms_reporting_db   | Analytics, occupancy, financial revenue KPIs  |
+| notification-service     | 8093 | hms_notification_db| Asynchronous Email, SMS, Push notification DLQ|
+| purchase-service         | 8094 | hms_purchase_db    | Vendor management, PR, Quotation, PO, GRN     |
++--------------------------+------+--------------------+-----------------------------------------------+
+
+
+====================================================================================================
+2. USER ROLES & OPERATIONAL PERMISSIONS
+====================================================================================================
+
+The system implements strict Role-Based Access Control (RBAC). Every JWT token carries the user's
+unique identifier (`sub` / `userId`), username, email, and assigned `role`.
+
+2.1 User Role Catalog:
+1. OWNER:
+   - Supreme system authority.
+   - Access to financial balance sheets, profit & loss, high-level staff salary details, vendor contracts,
+     hotel policy changes, and executive dashboards.
+2. ADMIN:
+   - Full technical and administrative control over hotel configuration.
+   - Manages user accounts, staff profiles, system settings, room configurations, pricing policies,
+     and overall audit logs.
+3. MANAGER:
+   - Department and operational lead (Front Desk Manager, Housekeeping Manager, F&B Manager, General Manager).
+   - Approves Purchase Requests (PR), Purchase Orders (PO), Staff Leave applications.
+   - Manages shift allocations, room maintenance approvals, bill adjustments, and guest disputes.
+4. RECEPTIONIST:
+   - Front-desk operations team.
+   - Creates guest profiles, performs check-ins and check-outs, issues room keys, adds folio charges,
+     finalizes bills, and coordinates with housekeeping for clean rooms.
+5. HOUSEKEEPER:
+   - Room cleaning, sanitization, and room turnover staff.
+   - Updates room statuses (`CLEAN`, `DIRTY`, `INSPECTED`, `DO_NOT_DISTURB`), raises maintenance requests,
+     submits material requests (e.g. linen/towels), clocks in/out.
+6. MAINTENANCE:
+   - Facility and engineering technicians.
+   - Resolves room/amenity work orders (`IN_REPAIR`, `OUT_OF_ORDER`), consumes maintenance parts,
+     raises low-stock purchase requests, clocks in/out.
+7. CHEF / KITCHEN:
+   - Restaurant and kitchen management.
+   - Receives Kitchen Order Tickets (KOT), updates dish statuses, manages kitchen pantry stock.
+8. WAITER:
+   - Dining hall and in-room service staff.
+   - Takes table orders, delivers dining requests, posts restaurant charges to guest room folio.
+9. CASHIER:
+   - Billing and treasury staff.
+   - Processes guest final payments, logs cash/card transactions, issues official receipts, handles refunds.
+10. STAFF:
+    - Generic employee identity.
+    - View own profile, shift schedule, clock-in, clock-out, apply for personal leave.
+11. GUEST:
+    - Registered hotel guest.
+    - Searches available rooms, books reservations, views own folio, orders room service/spa, submits feedback.
+
+
+====================================================================================================
+3. GRANULAR ROLE-BASED ACCESS CONTROL (RBAC) MATRIX
+====================================================================================================
+
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| Service                    | Endpoint & HTTP Method                     | Allowed Roles                       | Description of Functionality                           |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| auth-service               | POST /api/auth/register                    | Public (Guest) / ADMIN (Staff)      | User account registration                              |
+| auth-service               | POST /api/auth/login                       | Public                              | Authenticates credentials & issues HMAC-512 JWT token  |
+| auth-service               | POST /api/auth/refresh-token               | Public                              | Exchanges refresh token for new access token           |
+| auth-service               | GET  /api/auth/me                          | Authenticated (All Roles)           | Retrieves current user principal details               |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| guest-service              | POST /api/guests                           | RECEPTIONIST, MANAGER, ADMIN, OWNER | Registers or profiles a new hotel guest                |
+| guest-service              | GET  /api/guests/{id}                      | RECEPTIONIST, MANAGER, ADMIN, OWNER | Fetches guest contact & identification details         |
+| guest-service              | GET  /api/guests/my-profile                | GUEST                               | Guest views their personal loyalty and booking history |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| room-service               | GET  /api/rooms/available                  | Public, GUEST, RECEPTIONIST, MANAGER| Searches available rooms based on type & dates         |
+| room-service               | POST /api/rooms                            | ADMIN, OWNER, MANAGER               | Creates new room inventory                             |
+| room-service               | PUT  /api/rooms/{id}/status                | RECEPTIONIST, HOUSEKEEPER, MANAGER  | Updates status (CLEAN, DIRTY, IN_REPAIR, AVAILABLE)   |
+| room-service               | PUT  /api/rooms/{id}/maintenance           | MAINTENANCE, MANAGER, ADMIN         | Marks room as OUT_OF_ORDER or IN_REPAIR                |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| reservation-service        | POST /api/reservations                     | GUEST, RECEPTIONIST, MANAGER, ADMIN | Creates a new room booking                             |
+| reservation-service        | PUT  /api/reservations/{id}/check-in       | RECEPTIONIST, MANAGER, ADMIN        | Performs physical guest check-in & allocates room      |
+| reservation-service        | PUT  /api/reservations/{id}/check-out      | RECEPTIONIST, MANAGER, ADMIN        | Initiates check-out (requires bill settlement)         |
+| reservation-service        | PUT  /api/reservations/{id}/cancel         | GUEST (own), RECEPTIONIST, MANAGER  | Cancels reservation (subject to cancellation policy)   |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| billing-service            | GET  /api/bills/reservation/{resId}        | RECEPTIONIST, CASHIER, MANAGER, GUEST| Views current guest bill & unfinalized room charges    |
+| billing-service            | POST /api/bills/charges                    | RECEPTIONIST, WAITER, MANAGER       | Posts incidental room charge (mini-bar, dining, spa)   |
+| billing-service            | PUT  /api/bills/{id}/finalize              | RECEPTIONIST, CASHIER, MANAGER, ADMIN| Finalizes folio charges & locks bill for payment       |
+| billing-service            | PUT  /api/bills/{id}/reopen                | MANAGER, ADMIN, OWNER               | Reopens a finalized bill for administrative adjustment  |
+| billing-service            | GET  /api/bills/revenue/summary            | MANAGER, ADMIN, OWNER               | Summarizes hotel revenue, outstanding balances, taxes  |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| payment-service            | POST /api/payments                         | CASHIER, RECEPTIONIST, GUEST, ADMIN | Processes payment (CASH, CREDIT_CARD, UPI, ONLINE)     |
+| payment-service            | POST /api/payments/{id}/refund             | CASHIER, MANAGER, ADMIN, OWNER      | Processes full or partial refund to guest              |
+| payment-service            | GET  /api/payments/bill/{billId}           | CASHIER, RECEPTIONIST, MANAGER, ADMIN| Fetches all transaction receipts linked to a bill      |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| staff-service              | POST /api/staff                            | ADMIN, OWNER                        | Onboards staff member & configures role/salary         |
+| staff-service              | GET  /api/staff                            | ADMIN, OWNER, MANAGER               | Lists all hotel employees                              |
+| staff-service              | GET  /api/staff/{id}                       | ADMIN, OWNER, MANAGER, Self         | Views staff details (salary hidden for non-executives) |
+| staff-service              | POST /api/attendance/check-in/{staffId}    | Self, MANAGER, ADMIN, OWNER         | Clocks in employee for current shift                   |
+| staff-service              | POST /api/attendance/check-out/{staffId}   | Self, MANAGER, ADMIN, OWNER         | Clocks out employee (supports cross-midnight shifts)   |
+| staff-service              | POST /api/attendance                       | MANAGER, ADMIN, OWNER               | Administrative attendance correction                   |
+| staff-service              | POST /api/leave                            | RECEPTIONIST, HOUSEKEEPER, MANAGER  | Submits employee leave application                     |
+| staff-service              | PUT  /api/leave/{id}/approval              | ADMIN, OWNER                        | Approves/rejects leave & auto-marks attendance ON_LEAVE|
+| staff-service              | POST /api/shifts                           | MANAGER, ADMIN, OWNER               | Creates shift schedules (Morning, Evening, Night)      |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| purchase-service           | POST /api/suppliers                        | ADMIN, OWNER, MANAGER               | Registers external vendors & suppliers                 |
+| purchase-service           | POST /api/purchase-requests                | HOUSEKEEPER, MAINTENANCE, RECEPT, MGR| Submits internal material requisition (PR)              |
+| purchase-service           | PUT  /api/purchase-requests/{id}/approve   | MANAGER, ADMIN, OWNER               | Approves material requisition for vendor bidding       |
+| purchase-service           | POST /api/quotations                       | MANAGER, ADMIN, OWNER               | Logs vendor price quotation & delivery lead time       |
+| purchase-service           | PUT  /api/quotations/{id}/select           | MANAGER, ADMIN, OWNER               | Selects winning quote & auto-rejects competing bids    |
+| purchase-service           | POST /api/purchase-orders                  | MANAGER, ADMIN, OWNER, STAFF        | Generates official Purchase Order (PO)                 |
+| purchase-service           | PUT  /api/purchase-orders/{id}/approve      | MANAGER, ADMIN, OWNER               | Manager approves PO dispatch                           |
+| purchase-service           | PUT  /api/purchase-orders/{id}/send         | MANAGER, ADMIN, OWNER, STAFF        | Dispatches PO to vendor                                |
+| purchase-service           | POST /api/goods-receipts                   | MANAGER, ADMIN, OWNER, STAFF        | Inspects delivery (GRN) & triggers auto-stock increment|
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| inventory-service          | GET  /api/inventory/items                  | STAFF, HOUSEKEEPER, MAINT, MGR, ADM | Views real-time physical warehouse stock               |
+| inventory-service          | POST /api/inventory/items                  | MANAGER, ADMIN, OWNER               | Adds new inventory catalog item & min-threshold        |
+| inventory-service          | POST /api/inventory/stock-in               | MANAGER, ADMIN, STAFF               | Manually adds stock into warehouse                     |
+| inventory-service          | POST /api/inventory/stock-out              | HOUSEKEEPER, MAINTENANCE, MGR, ADM  | Consumes stock (triggers LowStock event if below min)  |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| operations-service         | POST /api/housekeeping/tasks               | RECEPTIONIST, MANAGER, ADMIN        | Dispatches room cleaning / turnover task               |
+| operations-service         | PUT  /api/housekeeping/tasks/{id}/complete | HOUSEKEEPER, MANAGER                | Marks room cleaning complete & updates room to CLEAN   |
+| operations-service         | POST /api/maintenance/requests             | HOUSEKEEPER, RECEPTIONIST, MGR, ADM | Reports plumbing, electrical, AC, or fixture defects   |
+| operations-service         | PUT  /api/maintenance/requests/{id}/solve  | MAINTENANCE, MANAGER                | Resolves work order & restores room to AVAILABLE       |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| guest-experience-service   | GET  /api/dining/menu                      | Public, GUEST, WAITER, RECEPTIONIST | Fetches restaurant & room service menu catalog         |
+| guest-experience-service   | POST /api/dining/orders                    | GUEST, WAITER, RECEPTIONIST         | Places dining or room service order                    |
+| guest-experience-service   | PUT  /api/dining/orders/{id}/status        | CHEF, WAITER, MANAGER               | Updates preparation state (COOKING, READY, DELIVERED)  |
+| guest-experience-service   | POST /api/feedback                         | GUEST                               | Submits guest review, star rating & service feedback   |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+| reporting-service          | GET  /api/reports/occupancy                | MANAGER, ADMIN, OWNER               | Generates daily, monthly & annual occupancy rates      |
+| reporting-service          | GET  /api/reports/revenue                  | ADMIN, OWNER, MANAGER               | Generates RevPAR, ADR, and gross revenue breakdown     |
++----------------------------+--------------------------------------------+-------------------------------------+--------------------------------------------------------+
+
+
+====================================================================================================
+4. COMPREHENSIVE END-TO-END BUSINESS WORKFLOWS
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+WORKFLOW 1: COMPLETE GUEST RESERVATION, STAY, CHECKOUT & BILLING FINALIZATION
+----------------------------------------------------------------------------------------------------
+Step 1: Guest Discovery & Reservation
+- Guest or Receptionist searches available rooms via `GET /api/rooms/available?checkIn=2026-10-01&checkOut=2026-10-05`.
+- Reservation is created via `POST /api/reservations` in `CONFIRMED` status.
+- RabbitMQ publishes `ReservationCreated` event.
+- `billing-service` receives the event and initializes a Folio / Bill record in `DRAFT` status with room rate totals.
+
+Step 2: Guest Check-In
+- Upon arrival, Receptionist verifies guest identity and calls `PUT /api/reservations/{id}/check-in`.
+- Room status in `room-service` transitions from `AVAILABLE` to `OCCUPIED`.
+- Keycard access is generated.
+
+Step 3: In-Stay Service & Incidentals Posting
+- Guest orders room service food ($45.00) via `POST /api/dining/orders`.
+- The charge is posted to `billing-service` via `POST /api/bills/charges`, updating the folio with Item: "Dinner Room Service", Subtotal: $45.00, Tax: $4.50.
+
+Step 4: Check-Out Request & Bill Finalization
+- Guest approaches Front Desk to check out.
+- Receptionist reviews the bill: Total = Room ($400.00) + Dining ($49.50) = $449.50.
+- Receptionist locks all charges and finalizes the bill via `PUT /api/bills/{billId}/finalize`.
+- Status changes to `FINALIZED`. At this point, the outstanding balance is $449.50.
+
+Step 5: Payment Settlement
+- Cashier/Receptionist calls `POST /api/payments` with `billId: 101, amount: 449.50, paymentMethod: "CREDIT_CARD"`.
+- Payment Service verifies the transaction and synchronously updates `billing-service` via Feign.
+- In `billing-service`, `paidAmount` becomes $449.50, `outstandingAmount` becomes $0.00, and status transitions to `PAID`.
+- Official payment receipt is generated.
+
+Step 6: Physical Check-Out & Housekeeping Dispatch
+- Receptionist marks reservation as `CHECKED_OUT` via `PUT /api/reservations/{id}/check-out`.
+- Room status in `room-service` transitions to `DIRTY`.
+- RabbitMQ event `GuestCheckedOut` triggers an automated Housekeeping Cleaning Task in `operations-service`.
+
+----------------------------------------------------------------------------------------------------
+WORKFLOW 2: STAFF HR, ROSTERING, ATTENDANCE & LEAVE MANAGEMENT
+----------------------------------------------------------------------------------------------------
+Step 1: Staff Onboarding
+- Admin/Owner creates employee profile via `POST /api/staff`.
+- Assigns role (`RECEPTIONIST`, `HOUSEKEEPER`, `MAINTENANCE`, `MANAGER`), salary, shift, and department.
+
+Step 2: Daily Clock-In
+- Employee arrives at shift and clocks in via `POST /api/attendance/check-in/{staffId}`.
+- System validates employee is `active == true`, matches user credentials, records `checkInTime = LocalTime.now()`, and status = `PRESENT`.
+
+Step 3: Cross-Midnight / Night Shift Clock-Out
+- Employee finishes shift and clocks out via `POST /api/attendance/check-out/{staffId}`.
+- If employee clocked in at 10:00 PM yesterday and clocks out at 6:00 AM today, the system detects the open check-in from yesterday, sets `checkOutTime = 06:00:00`, and calculates `workHours = 8.00 hours`.
+
+Step 4: Leave Application & Automatic Roster Synchronization
+- Receptionist/Housekeeper submits leave via `POST /api/leave` (e.g., from 2026-10-10 to 2026-10-12).
+- Admin or Owner approves leave via `PUT /api/leave/{id}/approval` (`status: "APPROVED"`).
+- `LeaveServiceImpl` iterates over all dates in the range (Oct 10, 11, 12) and automatically populates `attendance` records with `status = ON_LEAVE` and remarks "Approved Leave: ANNUAL".
+
+----------------------------------------------------------------------------------------------------
+WORKFLOW 3: PROCUREMENT, LOW-STOCK ALERTS, PURCHASE ORDERS & INVENTORY REPLENISHMENT
+----------------------------------------------------------------------------------------------------
+Step 1: Automated Low-Stock Alert
+- Housekeeping staff consumes 20 bath towels via `POST /api/inventory/stock-out`.
+- Warehouse stock drops to 5, which is below the minimum threshold of 10.
+- `inventory-service` publishes `LowStockDetected` event to RabbitMQ (`hms.inventory.low-stock`).
+
+Step 2: Auto-Generation of Purchase Request (PR)
+- `purchase-service` consumes `LowStockDetected` event.
+- Automatically creates a draft Purchase Request (PR) with `priority = HIGH`, requesting 15 replenishment units.
+
+Step 3: PR Approval & Supplier Quotations
+- Hotel Manager reviews PR via `GET /api/purchase-requests` and approves it via `PUT /api/purchase-requests/{id}/approve`.
+- Supplier bids are received and logged via `POST /api/quotations`.
+- Manager compares price, tax, and lead times, then selects the best quote via `PUT /api/quotations/{id}/select`.
+
+Step 4: PO Creation & Dispatch
+- Manager generates Purchase Order via `POST /api/purchase-orders`, approves it (`PUT .../approve`), and dispatches it (`PUT .../send`).
+- System prevents orders from being issued to `BLACKLISTED` or `INACTIVE` suppliers.
+
+Step 5: Goods Receipt (GRN) & Automated Real-Time Inventory Stock-In
+- Vendor truck delivers goods to the loading dock.
+- Staff records Goods Receipt Note via `POST /api/goods-receipts`: Received = 15, Accepted = 14, Rejected = 1 (damaged).
+- `purchase-service` publishes `GoodsReceived` event to RabbitMQ.
+- `inventory-service` consumes the event and automatically executes `inventoryService.stockIn(...)`, incrementing physical warehouse balance by +14 units without manual inventory intervention.
+
+
+====================================================================================================
+5. CONCRETE REQUEST / RESPONSE EXAMPLES
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+EXAMPLE 1: REGISTER SUPPLIER (`POST /api/suppliers`)
+----------------------------------------------------------------------------------------------------
+Request:
+POST /api/suppliers
+Authorization: Bearer <JWT_TOKEN>
+Content-Type: application/json
+
+{
+  "name": "Crown Hospitality Linens Ltd",
+  "contactPerson": "Sarah Jenkins",
+  "email": "sarah@crownlinens.com",
+  "phone": "+1-555-0188",
+  "address": "88 Industrial Boulevard, Suite 400",
+  "taxNumber": "TX-9948201",
+  "paymentTerms": "NET_30",
+  "rating": 5.0
+}
+
+Response (201 Created):
+{
+  "id": 1,
+  "supplierCode": "SUP-8F2B1A9C",
+  "name": "Crown Hospitality Linens Ltd",
+  "contactPerson": "Sarah Jenkins",
+  "email": "sarah@crownlinens.com",
+  "phone": "+1-555-0188",
+  "address": "88 Industrial Boulevard, Suite 400",
+  "taxNumber": "TX-9948201",
+  "paymentTerms": "NET_30",
+  "status": "ACTIVE",
+  "rating": 5.00,
+  "createdAt": "2026-09-18T20:15:00",
+  "updatedAt": "2026-09-18T20:15:00"
+}
+
+----------------------------------------------------------------------------------------------------
+EXAMPLE 2: CREATE PURCHASE REQUEST (`POST /api/purchase-requests`)
+----------------------------------------------------------------------------------------------------
+Request:
+POST /api/purchase-requests
+Authorization: Bearer <JWT_TOKEN>
+Content-Type: application/json
+
+{
+  "requesterId": 1,
+  "departmentId": 1,
+  "priority": "HIGH",
+  "reason": "Quarterly Linen Restock",
+  "requiredByDate": "2026-10-01",
+  "items": [
+    {
+      "itemId": 1,
+      "itemName": "King Size Bed Sheets",
+      "quantityRequested": 50,
+      "unitOfMeasure": "PIECES",
+      "estimatedUnitPrice": 18.00
+    }
+  ]
+}
+
+Response (201 Created):
+{
+  "id": 1,
+  "requestCode": "PR-D4A1B2C3",
+  "departmentId": 1,
+  "requesterId": 1,
+  "requesterRole": "MANAGER",
+  "reason": "Quarterly Linen Restock",
+  "priority": "HIGH",
+  "status": "SUBMITTED",
+  "requiredByDate": "2026-10-01",
+  "items": [
+    {
+      "id": 1,
+      "itemId": 1,
+      "itemName": "King Size Bed Sheets",
+      "quantityRequested": 50,
+      "unitOfMeasure": "PIECES",
+      "estimatedUnitPrice": 18.00
+    }
+  ],
+  "createdAt": "2026-09-18T20:20:00"
+}
+
+----------------------------------------------------------------------------------------------------
+EXAMPLE 3: RECORD GOODS RECEIPT NOTE / GRN (`POST /api/goods-receipts`)
+----------------------------------------------------------------------------------------------------
+Request:
+POST /api/goods-receipts
+Authorization: Bearer <JWT_TOKEN>
+Content-Type: application/json
+
+{
+  "purchaseOrderId": 1,
+  "deliveryNoteNumber": "DN-CROWN-7741",
+  "receivedDate": "2026-09-24",
+  "receivedByStaffId": 2,
+  "vehicleNumber": "TRUCK-9901",
+  "remarks": "Delivered in sealed cartons",
+  "items": [
+    {
+      "purchaseOrderItemId": 1,
+      "itemId": 1,
+      "receivedQuantity": 50,
+      "acceptedQuantity": 48,
+      "rejectedQuantity": 2,
+      "rejectionReason": "2 sheets had fabric tears",
+      "batchNumber": "BATCH-2026-09B",
+      "expiryDate": "2030-01-01"
+    }
+  ]
+}
+
+Response (201 Created):
+{
+  "id": 1,
+  "receiptCode": "GRN-9C8E7F6A",
+  "purchaseOrderId": 1,
+  "deliveryNoteNumber": "DN-CROWN-7741",
+  "receivedDate": "2026-09-24",
+  "receivedByStaffId": 2,
+  "vehicleNumber": "TRUCK-9901",
+  "items": [
+    {
+      "id": 1,
+      "purchaseOrderItemId": 1,
+      "itemId": 1,
+      "receivedQuantity": 50,
+      "acceptedQuantity": 48,
+      "rejectedQuantity": 2,
+      "rejectionReason": "2 sheets had fabric tears",
+      "batchNumber": "BATCH-2026-09B",
+      "expiryDate": "2030-01-01"
+    }
+  ]
+}
+
+----------------------------------------------------------------------------------------------------
+EXAMPLE 4: STAFF CLOCK-IN (`POST /api/attendance/check-in/{staffId}`)
+----------------------------------------------------------------------------------------------------
+Request:
+POST /api/attendance/check-in/1?shiftId=1
+Authorization: Bearer <JWT_TOKEN_FOR_STAFF_1>
+
+Response (200 OK):
+{
+  "id": 10,
+  "staffId": 1,
+  "date": "2026-09-18",
+  "checkInTime": "08:58:32",
+  "checkOutTime": null,
+  "status": "PRESENT",
+  "shiftId": 1,
+  "workHours": null,
+  "remarks": null,
+  "createdAt": "2026-09-18T08:58:32"
+}
+
+----------------------------------------------------------------------------------------------------
+EXAMPLE 5: STAFF CLOCK-OUT (`POST /api/attendance/check-out/{staffId}`)
+----------------------------------------------------------------------------------------------------
+Request:
+POST /api/attendance/check-out/1
+Authorization: Bearer <JWT_TOKEN_FOR_STAFF_1>
+
+Response (200 OK):
+{
+  "id": 10,
+  "staffId": 1,
+  "date": "2026-09-18",
+  "checkInTime": "08:58:32",
+  "checkOutTime": "17:02:15",
+  "status": "PRESENT",
+  "shiftId": 1,
+  "workHours": 8.06,
+  "remarks": null,
+  "updatedAt": "2026-09-18T17:02:15"
+}
+
+----------------------------------------------------------------------------------------------------
+EXAMPLE 6: FINALIZE GUEST BILL (`PUT /api/bills/{billId}/finalize`)
+----------------------------------------------------------------------------------------------------
+Request:
+PUT /api/bills/101/finalize
+Authorization: Bearer <JWT_TOKEN_RECEPTIONIST>
+
+Response (200 OK):
+{
+  "id": 101,
+  "billNumber": "BILL-2026-000101",
+  "reservationId": 50,
+  "guestId": 12,
+  "totalAmount": 550.00,
+  "paidAmount": 0.00,
+  "outstandingAmount": 550.00,
+  "status": "FINALIZED",
+  "finalizedAt": "2026-09-18T10:30:00"
+}
+
+----------------------------------------------------------------------------------------------------
+EXAMPLE 7: SETTLE PAYMENT (`POST /api/payments`)
+----------------------------------------------------------------------------------------------------
+Request:
+POST /api/payments
+Authorization: Bearer <JWT_TOKEN_CASHIER>
+Content-Type: application/json
+
+{
+  "billId": 101,
+  "amount": 550.00,
+  "paymentMethod": "CREDIT_CARD",
+  "transactionReference": "TXN-CC-9988214"
+}
+
+Response (201 Created):
+{
+  "id": 201,
+  "paymentNumber": "PAY-883921",
+  "billId": 101,
+  "amount": 550.00,
+  "paymentMethod": "CREDIT_CARD",
+  "status": "COMPLETED",
+  "transactionReference": "TXN-CC-9988214",
+  "paidAt": "2026-09-18T10:35:12"
+}
+
+====================================================================================================
+6. SUMMARY OF BEST PRACTICES & MAINTENANCE CHECKLIST
+====================================================================================================
+1. Gateway Single Entry: All frontend applications and external integrations should route through
+   `http://localhost:8080/api/{service-route}`.
+2. Security Token Handling: Tokens are valid for 24 hours. The Authorization header format must be:
+   `Authorization: Bearer <token>`.
+3. Event Broker Health: RabbitMQ must be running on port 5672 for automatic stock replenishments,
+   low-stock alerts, and billing auto-initialization.
+4. Database Integrity: Each microservice maintains its own schema for complete bounded context isolation.
+
+====================================================================================================
+                                      END OF SPECIFICATION FILE
+====================================================================================================

@@ -1,0 +1,3728 @@
+{
+  "info": {
+    "_postman_id": "hms-brand-new-2026",
+    "name": "Hotel Management System - Microservices API Collection (NEW)",
+    "description": "Clean, verified, and complete Postman Collection built from scratch directly from the Spring Boot backend microservices source code, DTOs, Security configurations, and API Gateway routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01. Authentication & Role Logins",
+      "description": "User registration and role logins. Test scripts automatically extract JWT tokens to environment variables.",
+      "item": [
+        {
+          "name": "1.1 Register New Guest User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"GUEST_USER_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"johndoe\",\n  \"email\": \"johndoe@example.com\",\n  \"password\": \"Password@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.2 Login as Owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"OWNER_TOKEN\", jsonData.accessToken || jsonData.token);",
+                  "if (jsonData.refreshToken) {",
+                  "    pm.environment.set(\"OWNER_REFRESH_TOKEN\", jsonData.refreshToken);",
+                  "}",
+                  "pm.test(\"Role is OWNER\", function () {",
+                  "    pm.expect(jsonData.role).to.eql(\"OWNER\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"owner\",\n  \"password\": \"Owner@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.3 Login as Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"MANAGER_TOKEN\", jsonData.accessToken || jsonData.token);",
+                  "pm.environment.set(\"MANAGER_USER_ID\", jsonData.userId);",
+                  "if (jsonData.refreshToken) {",
+                  "    pm.environment.set(\"MANAGER_REFRESH_TOKEN\", jsonData.refreshToken);",
+                  "}",
+                  "pm.test(\"Role is MANAGER\", function () {",
+                  "    pm.expect(jsonData.role).to.eql(\"MANAGER\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"manager\",\n  \"password\": \"Manager@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.4 Login as Receptionist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"RECEPTIONIST_TOKEN\", jsonData.accessToken || jsonData.token);",
+                  "pm.environment.set(\"RECEPTIONIST_USER_ID\", jsonData.userId);",
+                  "if (jsonData.refreshToken) {",
+                  "    pm.environment.set(\"RECEPTIONIST_REFRESH_TOKEN\", jsonData.refreshToken);",
+                  "}",
+                  "pm.test(\"Role is RECEPTIONIST\", function () {",
+                  "    pm.expect(jsonData.role).to.eql(\"RECEPTIONIST\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"receptionist\",\n  \"password\": \"Reception@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.5 Login as Housekeeper",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"HOUSEKEEPER_TOKEN\", jsonData.accessToken || jsonData.token);",
+                  "pm.environment.set(\"HOUSEKEEPER_USER_ID\", jsonData.userId);",
+                  "if (jsonData.refreshToken) {",
+                  "    pm.environment.set(\"HOUSEKEEPER_REFRESH_TOKEN\", jsonData.refreshToken);",
+                  "}",
+                  "pm.test(\"Role is HOUSEKEEPER\", function () {",
+                  "    pm.expect(jsonData.role).to.eql(\"HOUSEKEEPER\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"housekeeper\",\n  \"password\": \"Housekeeper@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.6 Login as Guest (johndoe)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"GUEST_TOKEN\", jsonData.accessToken || jsonData.token);",
+                  "pm.environment.set(\"GUEST_USER_ID\", jsonData.userId);",
+                  "if (jsonData.refreshToken) {",
+                  "    pm.environment.set(\"GUEST_REFRESH_TOKEN\", jsonData.refreshToken);",
+                  "}",
+                  "pm.test(\"Role is GUEST\", function () {",
+                  "    pm.expect(jsonData.role).to.eql(\"GUEST\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"johndoe\",\n  \"password\": \"Password@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.7 Login as Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"ADMIN_TOKEN\", jsonData.accessToken || jsonData.token);",
+                  "if (jsonData.refreshToken) {",
+                  "    pm.environment.set(\"ADMIN_REFRESH_TOKEN\", jsonData.refreshToken);",
+                  "}",
+                  "pm.test(\"Role is ADMIN\", function () {",
+                  "    pm.expect(jsonData.role).to.eql(\"ADMIN\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"admin\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.8 Refresh Manager Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"New accessToken received\", function () {",
+                  "    pm.expect(jsonData.accessToken).to.be.a('string');",
+                  "});",
+                  "pm.environment.set(\"MANAGER_TOKEN\", jsonData.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{MANAGER_REFRESH_TOKEN}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.9 Refresh Guest Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"New accessToken received for guest\", function () {",
+                  "    pm.expect(jsonData.accessToken).to.be.a('string');",
+                  "});",
+                  "pm.environment.set(\"GUEST_TOKEN\", jsonData.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{GUEST_REFRESH_TOKEN}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.10 Logout Manager (Revoke Refresh Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Logout message confirmed\", function () {",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{MANAGER_REFRESH_TOKEN}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.11 Verify Revoked Refresh Token Is Rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 UNAUTHORIZED\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Error indicates token was revoked\", function () {",
+                  "    pm.expect(jsonData.message).to.include(\"revoked\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{MANAGER_REFRESH_TOKEN}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Staff Directory & HR Rosters",
+      "description": "Staff profile registration, attendance check-in, and leave application lifecycle.",
+      "item": [
+        {
+          "name": "2.1 Manager creates Staff Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"STAFF_ID\", jsonData.id);",
+                  "    pm.environment.set(\"STAFF_CODE\", jsonData.employeeCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 3,\n  \"employeeCode\": \"EMP-1001\",\n  \"fullName\": \"Anna Housekeeper\",\n  \"address\": \"123 Clean St\",\n  \"nic\": \"NIC-99887766V\",\n  \"salary\": 3500,\n  \"age\": 28,\n  \"occupation\": \"Housekeeping Lead\",\n  \"email\": \"anna.housekeeper@hotel.com\",\n  \"phone\": \"+1-555-0188\",\n  \"role\": \"HOUSEKEEPER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/staff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "staff"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.2 Get Staff Profile by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/staff/{{STAFF_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "staff",
+                "{{STAFF_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.3 Staff Clocks-In Attendance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or 201 CREATED\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"ATTENDANCE_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{HOUSEKEEPER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance/check-in/{{STAFF_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "attendance",
+                "check-in",
+                "{{STAFF_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.4 Staff Submits Leave Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"LEAVE_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{HOUSEKEEPER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"staffId\": 1,\n  \"leaveType\": \"CASUAL\",\n  \"startDate\": \"2026-11-01\",\n  \"endDate\": \"2026-11-03\",\n  \"reason\": \"Personal family commitment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/leave",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "leave"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.5 Manager Approves Leave Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status is APPROVED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"APPROVED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\",\n  \"remarks\": \"Leave approved with shift replacement arranged\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/leave/{{LEAVE_ID}}/approval",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "leave",
+                "{{LEAVE_ID}}",
+                "approval"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Master Data Setup (Categories, Amenities, Rooms, Rates)",
+      "description": "Room Categories, Amenities, Rooms, Dynamic Pricing Rules, and Staff Room Range Assignments.",
+      "item": [
+        {
+          "name": "3.1 Owner creates Room Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"CATEGORY_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{OWNER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"EXECUTIVE_SUITE\",\n  \"description\": \"Ultra luxury suite with private terrace and jacuzzi\",\n  \"basePrice\": 350,\n  \"maxOccupancy\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/room-categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "room-categories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.2 Get All Room Categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Categories list is non-empty\", function () {",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{OWNER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/room-categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "room-categories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.3 Owner creates Amenity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"AMENITY_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{OWNER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ocean View Balcony\",\n  \"description\": \"Private balcony overlooking the ocean\",\n  \"icon\": \"balcony\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/amenities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "amenities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.4 Owner creates Room 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"ROOM_ID\", jsonData.id);",
+                  "    pm.environment.set(\"ROOM_NUMBER\", jsonData.roomNumber);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{OWNER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomNumber\": \"401\",\n  \"categoryId\": 1,\n  \"resourceType\": \"ROOM\",\n  \"floor\": 4,\n  \"capacity\": 3,\n  \"pricePerNight\": 350,\n  \"amenityIds\": [\n    1\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rooms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.5 Get Room by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{OWNER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/rooms/{{ROOM_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rooms",
+                "{{ROOM_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.6 Owner configures Dynamic Pricing Rule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"RATE_RULE_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{OWNER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": 1,\n  \"resourceType\": \"ROOM\",\n  \"basePrice\": 350,\n  \"firstNightPrice\": 320,\n  \"extensionPrice\": 330,\n  \"weekendMultiplier\": 1.2,\n  \"holidayMultiplier\": 1.35,\n  \"seasonalMultiplier\": 1.15,\n  \"occupancyThreshold\": 70,\n  \"occupancyMultiplier\": 1.25,\n  \"effectiveFrom\": \"2026-01-01\",\n  \"effectiveTo\": \"2026-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.7 Manager configures Room Range Assignment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"ROOM_ASSIGNMENT_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"staffId\": 1,\n  \"startRoomNumber\": 100,\n  \"endRoomNumber\": 500,\n  \"effectiveFrom\": \"2026-01-01\",\n  \"effectiveTo\": \"2026-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/room-assignments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "room-assignments"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Guest Profiles & Stay Price Quotes",
+      "description": "Guest profile creation, room search, and dynamic pricing quote calculation.",
+      "item": [
+        {
+          "name": "4.1 Create / Link Guest Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"GUEST_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+19876543210\",\n  \"company\": \"Acme Corp\",\n  \"email\": \"johndoe@example.com\",\n  \"gender\": \"MALE\",\n  \"address\": \"456 Palm Grove Way, CA\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/guests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "guests"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.2 Get Guest Profile by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Guest first name matches\", function () {",
+                  "    pm.expect(jsonData.firstName).to.eql(\"John\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/guests/{{GUEST_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "guests",
+                "{{GUEST_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.3 Guest searches available rooms",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/rooms/available?categoryId={{CATEGORY_ID}}&minCapacity=2&resourceType=ROOM",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rooms",
+                "available"
+              ],
+              "query": [
+                {
+                  "key": "categoryId",
+                  "value": "{{CATEGORY_ID}}"
+                },
+                {
+                  "key": "minCapacity",
+                  "value": "2"
+                },
+                {
+                  "key": "resourceType",
+                  "value": "ROOM"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.4 Guest requests Dynamic Pricing Quote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Total amount quoted is positive\", function () {",
+                  "    pm.expect(jsonData.totalAmount).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": 1,\n  \"roomId\": 1,\n  \"resourceType\": \"ROOM\",\n  \"checkInDate\": \"2026-10-10\",\n  \"checkOutDate\": \"2026-10-13\",\n  \"guestsCount\": 2,\n  \"currentOccupancyPercentage\": 75\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rates/quote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rates",
+                "quote"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Reservation & Payment Saga Workflow",
+      "description": "Booking creation, idempotent payment execution, asynchronous Saga confirmation, and notification delivery.",
+      "item": [
+        {
+          "name": "5.1 Guest creates Reservation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"RESERVATION_ID\", jsonData.id);",
+                  "    pm.environment.set(\"RESERVATION_CODE\", jsonData.reservationCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"guestId\": 1,\n  \"resourceType\": \"ROOM\",\n  \"roomId\": 1,\n  \"roomCategoryId\": 1,\n  \"adults\": 2,\n  \"children\": 0,\n  \"checkInDateTime\": \"2026-10-10T14:00:00\",\n  \"checkOutDateTime\": \"2026-10-13T11:00:00\",\n  \"specialRequests\": \"Late arrival, high floor quiet room\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5.2 Process Idempotent Card Payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED or 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"PAYMENT_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reservationId\": 1,\n  \"amount\": 1355,\n  \"paymentMethod\": \"CARD\",\n  \"providerReference\": \"TXN-STRIPE-9901\",\n  \"idempotencyKey\": \"{{IDEMPOTENCY_KEY}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5.3 Test Payment Idempotency Repeat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Idempotent response returns existing payment ID\", function () {",
+                  "    pm.expect(jsonData.id).to.eql(parseInt(pm.environment.get(\"PAYMENT_ID\")));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reservationId\": 1,\n  \"amount\": 1355,\n  \"paymentMethod\": \"CARD\",\n  \"providerReference\": \"TXN-STRIPE-9901\",\n  \"idempotencyKey\": \"{{IDEMPOTENCY_KEY}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5.4 Verify Reservation Auto-Confirmed (Saga)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status is CONFIRMED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"CONFIRMED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservations/{{RESERVATION_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservations",
+                "{{RESERVATION_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5.5 Verify Notification Generated",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Front Desk Operations (Check-In, Waitlist & Check-Out)",
+      "description": "Guest Check-in, Room Occupancy status validation, Waitlist queueing, and Check-out.",
+      "item": [
+        {
+          "name": "6.1 Receptionist checks in the Guest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Reservation is CHECKED_IN\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"CHECKED_IN\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{RECEPTIONIST_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservations/{{RESERVATION_ID}}/check-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservations",
+                "{{RESERVATION_ID}}",
+                "check-in"
+              ]
+            }
+          }
+        },
+        {
+          "name": "6.2 Verify Room Status is OCCUPIED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Room status is OCCUPIED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"OCCUPIED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{RECEPTIONIST_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/rooms/{{ROOM_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rooms",
+                "{{ROOM_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "6.3 Join Waitlist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"guestId\": 1,\n  \"roomCategoryId\": 1,\n  \"resourceType\": \"ROOM\",\n  \"checkInDate\": \"2026-11-10\",\n  \"checkOutDate\": \"2026-11-13\",\n  \"guestsCount\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/waitlist",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "waitlist"
+              ]
+            }
+          }
+        },
+        {
+          "name": "6.4 Receptionist checks out the Guest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Reservation is CHECKED_OUT\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"CHECKED_OUT\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{RECEPTIONIST_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservations/{{RESERVATION_ID}}/check-out",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservations",
+                "{{RESERVATION_ID}}",
+                "check-out"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Guest In-Room Experience (QR Service, Complaints, Loyalty)",
+      "description": "QR Code in-room requests, guest complaints, feedback, and loyalty points.",
+      "item": [
+        {
+          "name": "7.1 Guest requests Extra Towels via QR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"SERVICE_REQUEST_ID\", jsonData.id);",
+                  "    pm.environment.set(\"SERVICE_REQUEST_CODE\", jsonData.requestCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reservationId\": 1,\n  \"guestId\": 1,\n  \"roomId\": 1,\n  \"requestType\": \"EXTRA_TOWELS\",\n  \"description\": \"Please deliver 2 extra bath towels and shampoo\",\n  \"quantity\": 2,\n  \"priority\": \"HIGH\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/service-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "service-requests"
+              ]
+            }
+          }
+        },
+        {
+          "name": "7.2 Get Service Request Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/service-requests/{{SERVICE_REQUEST_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "service-requests",
+                "{{SERVICE_REQUEST_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "7.3 Submit Guest Complaint",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"COMPLAINT_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"guestId\": 1,\n  \"reservationId\": 1,\n  \"roomId\": 1,\n  \"category\": \"AIR_CONDITIONING\",\n  \"description\": \"AC cooling is insufficient in the bedroom area\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/complaints",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "complaints"
+              ]
+            }
+          }
+        },
+        {
+          "name": "7.4 Manager resolves Guest Complaint",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status is RESOLVED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"RESOLVED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"RESOLVED\",\n  \"resolutionRemarks\": \"Technician inspected thermostat and adjusted cooling flow\",\n  \"changedBy\": \"MANAGER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/complaints/{{COMPLAINT_ID}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "complaints",
+                "{{COMPLAINT_ID}}",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "7.5 Guest submits Stay Feedback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"FEEDBACK_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"guestId\": 1,\n  \"reservationId\": 1,\n  \"roomId\": 1,\n  \"rating\": 5,\n  \"comments\": \"Outstanding stay and very prompt service!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feedback"
+              ]
+            }
+          }
+        },
+        {
+          "name": "7.6 Check Guest Loyalty Points",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/guest/{{GUEST_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "loyalty",
+                "guest",
+                "{{GUEST_ID}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Housekeeping & Operations Workflow",
+      "description": "Housekeeping task dispatch, acceptance, progression, completion, and room verification.",
+      "item": [
+        {
+          "name": "8.1 Housekeeper views assigned tasks",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.length > 0) {",
+                  "    pm.environment.set(\"TASK_ID\", jsonData[0].id);",
+                  "    pm.environment.set(\"TASK_CODE\", jsonData[0].taskCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{HOUSEKEEPER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/housekeeping/tasks/my?staffId={{STAFF_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "housekeeping",
+                "tasks",
+                "my"
+              ],
+              "query": [
+                {
+                  "key": "staffId",
+                  "value": "{{STAFF_ID}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "8.2 Housekeeper accepts the task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status is ACCEPTED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"ACCEPTED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{HOUSEKEEPER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/housekeeping/tasks/{{TASK_ID}}/accept?staffId={{STAFF_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "housekeeping",
+                "tasks",
+                "{{TASK_ID}}",
+                "accept"
+              ],
+              "query": [
+                {
+                  "key": "staffId",
+                  "value": "{{STAFF_ID}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "8.3 Housekeeper starts delivery",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status is IN_PROGRESS\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"IN_PROGRESS\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{HOUSEKEEPER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/housekeeping/tasks/{{TASK_ID}}/start?staffId={{STAFF_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "housekeeping",
+                "tasks",
+                "{{TASK_ID}}",
+                "start"
+              ],
+              "query": [
+                {
+                  "key": "staffId",
+                  "value": "{{STAFF_ID}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "8.4 Housekeeper completes delivery",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status is COMPLETED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"COMPLETED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{HOUSEKEEPER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/housekeeping/tasks/{{TASK_ID}}/complete?staffId={{STAFF_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "housekeeping",
+                "tasks",
+                "{{TASK_ID}}",
+                "complete"
+              ],
+              "query": [
+                {
+                  "key": "staffId",
+                  "value": "{{STAFF_ID}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "8.5 Manager verifies task completion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status is VERIFIED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"VERIFIED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/housekeeping/tasks/{{TASK_ID}}/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "housekeeping",
+                "tasks",
+                "{{TASK_ID}}",
+                "verify"
+              ]
+            }
+          }
+        },
+        {
+          "name": "8.6 View Task History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/housekeeping/tasks/{{TASK_ID}}/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "housekeeping",
+                "tasks",
+                "{{TASK_ID}}",
+                "history"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Maintenance & Breakage Reports",
+      "description": "Maintenance ticketing and damage breakage reporting with managerial approval.",
+      "item": [
+        {
+          "name": "9.1 Report Maintenance Issue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"MAINTENANCE_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{RECEPTIONIST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": 1,\n  \"description\": \"Jacuzzi temperature sensor faulty\",\n  \"reportedBy\": \"STAFF_RECEPTION\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/maintenance",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "maintenance"
+              ]
+            }
+          }
+        },
+        {
+          "name": "9.2 Assign Maintenance Technician",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"staffId\": 1,\n  \"estimatedCost\": 45,\n  \"priority\": \"MEDIUM\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/maintenance/{{MAINTENANCE_ID}}/assign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "maintenance",
+                "{{MAINTENANCE_ID}}",
+                "assign"
+              ]
+            }
+          }
+        },
+        {
+          "name": "9.3 Housekeeper reports In-Room Breakage",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"BREAKAGE_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{HOUSEKEEPER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": 1,\n  \"reservationId\": 1,\n  \"staffId\": 1,\n  \"description\": \"Cracked decorative lamp shade\",\n  \"chargeAmount\": 75\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/breakage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "breakage"
+              ]
+            }
+          }
+        },
+        {
+          "name": "9.4 Manager reviews & approves Breakage Charge",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status is APPROVED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"APPROVED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\",\n  \"managerId\": 2,\n  \"remarks\": \"Verified breakage by housekeeping photos\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/breakage/{{BREAKAGE_ID}}/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "breakage",
+                "{{BREAKAGE_ID}}",
+                "review"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Front Desk Cash Drawer & Shift Handover",
+      "description": "Shift opening/closing balancing and shift task handovers.",
+      "item": [
+        {
+          "name": "10.1 Open Cash Drawer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"CASH_DRAWER_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{RECEPTIONIST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"drawerDate\": \"2026-10-10\",\n  \"shiftId\": 1,\n  \"staffId\": 1,\n  \"openingBalance\": 500,\n  \"remarks\": \"Shift 1 opening cash drawer float\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cash-drawer/open",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cash-drawer",
+                "open"
+              ]
+            }
+          }
+        },
+        {
+          "name": "10.2 Close & Reconcile Cash Drawer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{RECEPTIONIST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"staffId\": 1,\n  \"cashReceived\": 250,\n  \"cashExpenses\": 50,\n  \"actualClosing\": 700,\n  \"remarks\": \"Balanced float closing count matches\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cash-drawer/{{CASH_DRAWER_ID}}/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cash-drawer",
+                "{{CASH_DRAWER_ID}}",
+                "close"
+              ]
+            }
+          }
+        },
+        {
+          "name": "10.3 Submit Shift Handover",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{RECEPTIONIST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outgoingStaffId\": 1,\n  \"incomingStaffId\": 2,\n  \"shiftId\": 1,\n  \"pendingPayments\": \"0\",\n  \"arrivals\": \"5\",\n  \"departures\": \"3\",\n  \"pendingComplaints\": \"0\",\n  \"pendingServiceRequests\": \"0\",\n  \"pendingHousekeepingTasks\": \"1\",\n  \"pendingMaintenance\": \"0\",\n  \"cashInformation\": \"Cash float reconciled at $700.00 in drawer #1\",\n  \"remarks\": \"VIP guest arriving on 4th floor at 6 PM\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shift-handover",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shift-handover"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Billing & Itemized Invoice Settlement",
+      "description": "Itemized charges, breakage charges, and bill finalization/printing.",
+      "item": [
+        {
+          "name": "11.1 Create Reservation Bill",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED or 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"BILL_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{RECEPTIONIST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reservationId\": 1,\n  \"guestId\": 1,\n  \"roomId\": 1,\n  \"checkInDate\": \"2026-10-10\",\n  \"checkOutDate\": \"2026-10-13\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bills",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bills"
+              ]
+            }
+          }
+        },
+        {
+          "name": "11.2 Get Reservation Bill Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{RECEPTIONIST_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bills/reservation/{{RESERVATION_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bills",
+                "reservation",
+                "{{RESERVATION_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "11.3 Finalize Bill",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Bill is finalized\", function () {",
+                  "    pm.expect(jsonData.status).to.be.oneOf([\"FINALIZED\", \"PAID\"]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{RECEPTIONIST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paidAmount\": 75,\n  \"discountAmount\": 0,\n  \"taxPercentage\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bills/{{BILL_ID}}/finalize",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bills",
+                "{{BILL_ID}}",
+                "finalize"
+              ]
+            }
+          }
+        },
+        {
+          "name": "11.4 Print / Download Bill Receipt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bills/{{BILL_ID}}/print",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bills",
+                "{{BILL_ID}}",
+                "print"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Inventory Management",
+      "description": "Hotel amenities inventory, stock-in replenishment, and low-stock alerts.",
+      "item": [
+        {
+          "name": "12.1 Create Inventory Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"INVENTORY_ITEM_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemCode\": \"INV-TOWEL-01\",\n  \"name\": \"Luxury Bath Towel Set\",\n  \"category\": \"LINEN\",\n  \"unit\": \"PIECES\",\n  \"initialQuantity\": 150,\n  \"minimumThreshold\": 30,\n  \"unitCost\": 12.5,\n  \"description\": \"High quality cotton bath towels\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory"
+              ]
+            }
+          }
+        },
+        {
+          "name": "12.2 Check Low Stock Alerts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/low-stock",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "low-stock"
+              ]
+            }
+          }
+        },
+        {
+          "name": "12.3 Record Stock Replenishment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 50,\n  \"reason\": \"PURCHASE\",\n  \"referenceNumber\": \"GRN-2026-001\",\n  \"remarks\": \"Direct warehouse intake\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/{{INVENTORY_ITEM_ID}}/stock-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "{{INVENTORY_ITEM_ID}}",
+                "stock-in"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Executive Analytics & Reporting",
+      "description": "Hotel daily revenue KPIs, occupancy summaries, and staff performance.",
+      "item": [
+        {
+          "name": "13.1 Get Executive Daily Summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{OWNER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/daily-summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports",
+                "daily-summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "13.2 Get Revenue & Occupancy Analytics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/revenue?startDate=2026-09-01&endDate=2026-09-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports",
+                "revenue"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-09-30"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "13.3 Get Staff Performance Metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/staff-performance?startDate=2026-09-01&endDate=2026-09-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports",
+                "staff-performance"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-09-30"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Purchase & Procurement Lifecycle",
+      "description": "Supplier registry, Purchase Requests (PR), Quotations (RFQ), Purchase Orders (PO), Goods Receipts (GRN), and Audit trails.",
+      "item": [
+        {
+          "name": "14.1 Register New Supplier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"SUPPLIER_ID\", jsonData.id);",
+                  "    pm.environment.set(\"SUPPLIER_CODE\", jsonData.supplierCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Apex Hospitality Suppliers\",\n  \"contactPerson\": \"Sarah Connor\",\n  \"email\": \"sarah@apexsupplies.com\",\n  \"phone\": \"+1-555-0199\",\n  \"address\": \"450 Industrial Parkway, Chicago IL\",\n  \"taxNumber\": \"TAX-US-99281\",\n  \"paymentTerms\": \"NET_30\",\n  \"rating\": 4.9\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/suppliers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "suppliers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14.2 List Active Suppliers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/suppliers?status=ACTIVE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "suppliers"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "14.3 Create Purchase Request (PR)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"PR_ID\", jsonData.id);",
+                  "    pm.environment.set(\"PR_CODE\", jsonData.requestCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{HOUSEKEEPER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"departmentId\": 1,\n  \"requesterId\": 1,\n  \"reason\": \"Linen stock replenishment for upcoming peak season\",\n  \"priority\": \"HIGH\",\n  \"requiredByDate\": \"2026-10-01\",\n  \"items\": [\n    {\n      \"itemId\": 1,\n      \"itemName\": \"Luxury Cotton Bath Towel\",\n      \"quantityRequested\": 100,\n      \"unitOfMeasure\": \"PIECES\",\n      \"estimatedUnitPrice\": 12.5\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/purchase-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchase-requests"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14.4 Approve Purchase Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"PR Status is APPROVED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"APPROVED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"managerId\": 2,\n  \"remarks\": \"Approved for procurement RFQ\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/purchase-requests/{{PR_ID}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchase-requests",
+                "{{PR_ID}}",
+                "approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14.5 Record Supplier Quotation (RFQ)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"QUOTATION_ID\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purchaseRequestId\": 1,\n  \"supplierId\": 1,\n  \"quotationDate\": \"2026-09-15\",\n  \"expiryDate\": \"2026-10-15\",\n  \"paymentTerms\": \"NET_30\",\n  \"deliveryLeadTimeDays\": 5,\n  \"notes\": \"Direct manufacturer pricing including volume discount\",\n  \"items\": [\n    {\n      \"itemId\": 1,\n      \"itemName\": \"Luxury Cotton Bath Towel\",\n      \"quotedQuantity\": 100,\n      \"unitPrice\": 11,\n      \"discountPercentage\": 5,\n      \"taxPercentage\": 8\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/quotations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quotations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14.6 Select Winning Quotation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Quotation status is SELECTED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"SELECTED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/quotations/{{QUOTATION_ID}}/select",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quotations",
+                "{{QUOTATION_ID}}",
+                "select"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14.7 Generate Purchase Order (PO)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"PO_ID\", jsonData.id);",
+                  "    pm.environment.set(\"PO_CODE\", jsonData.orderCode);",
+                  "    if (jsonData.items && jsonData.items.length > 0) {",
+                  "        pm.environment.set(\"PO_ITEM_ID\", jsonData.items[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purchaseRequestId\": 1,\n  \"quotationId\": 1,\n  \"supplierId\": 1,\n  \"orderDate\": \"2026-09-15\",\n  \"expectedDeliveryDate\": \"2026-09-22\",\n  \"paymentTerms\": \"NET_30\",\n  \"shippingAddress\": \"Hotel Grand Central, Loading Dock Bay 2\",\n  \"remarks\": \"Standard delivery to main store\",\n  \"items\": [\n    {\n      \"itemId\": 1,\n      \"itemName\": \"Luxury Cotton Bath Towel\",\n      \"orderedQuantity\": 100,\n      \"unitPrice\": 11,\n      \"taxRate\": 8\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/purchase-orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchase-orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14.8 Approve Purchase Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"PO Status is APPROVED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"APPROVED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{OWNER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"managerId\": 1,\n  \"remarks\": \"Purchase Order approved by executive owner\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/purchase-orders/{{PO_ID}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchase-orders",
+                "{{PO_ID}}",
+                "approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14.9 Send Purchase Order to Supplier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"PO Status is SENT_TO_SUPPLIER\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"SENT_TO_SUPPLIER\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/purchase-orders/{{PO_ID}}/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchase-orders",
+                "{{PO_ID}}",
+                "send"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14.10 Record Goods Receipt Note (GRN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 CREATED\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"GRN_ID\", jsonData.id);",
+                  "    pm.environment.set(\"GRN_CODE\", jsonData.receiptCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{HOUSEKEEPER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purchaseOrderId\": 1,\n  \"deliveryNoteNumber\": \"DN-APEX-8812\",\n  \"receivedDate\": \"2026-09-15\",\n  \"receivedByStaffId\": 1,\n  \"vehicleNumber\": \"IL-TRK-7721\",\n  \"remarks\": \"Delivery received, inspected, and verified\",\n  \"items\": [\n    {\n      \"purchaseOrderItemId\": 1,\n      \"itemId\": 1,\n      \"receivedQuantity\": 100,\n      \"acceptedQuantity\": 98,\n      \"rejectedQuantity\": 2,\n      \"rejectionReason\": \"2 towels damaged during transit\",\n      \"batchNumber\": \"BATCH-2026-09-A\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/goods-receipts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "goods-receipts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14.11 Get Goods Receipts for Purchase Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{MANAGER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/goods-receipts/purchase-order/{{PO_ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "goods-receipts",
+                "purchase-order",
+                "{{PO_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14.12 View Purchase Audit Logs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{OWNER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/purchase-audit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchase-audit"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "99. Negative & Validation Tests",
+      "description": "Validation rules, unauthorized access tests, and role permission tests.",
+      "item": [
+        {
+          "name": "99.1 Missing Authorization Header (Expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 UNAUTHORIZED\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/room-categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "room-categories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "99.2 Invalid JWT Token (Expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 UNAUTHORIZED\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid.fake.token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/room-categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "room-categories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "99.3 Guest forbidden from Creating Room Category (Expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 FORBIDDEN\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ILLEGAL_SUITE\",\n  \"basePrice\": 100,\n  \"maxOccupancy\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/room-categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "room-categories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "99.4 Validation Failure on Missing Required Fields (Expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 BAD REQUEST\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{OWNER_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rooms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "99.5 Invalid Enum Value for Payment Method (Expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 BAD REQUEST\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{GUEST_TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reservationId\": 1,\n  \"amount\": 100,\n  \"paymentMethod\": \"BITCOIN\",\n  \"idempotencyKey\": \"IDEMP-ERR-001\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
