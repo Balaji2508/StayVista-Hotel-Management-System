@@ -7,6 +7,7 @@ import { NotificationUiService } from '../../core/services/notification-ui.servi
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-notification-list',
@@ -16,7 +17,8 @@ import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
     RouterModule,
     PageHeaderComponent,
     LoadingSpinnerComponent,
-    TimeAgoPipe
+    TimeAgoPipe,
+    IconComponent
   ],
   template: `
     <div class="notifications-page">
@@ -24,7 +26,10 @@ import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
         title="System Event Notifications & Alerts"
         subtitle="Live audit trail of booking lifecycle events, low-stock reorder triggers, payment confirmations, and maintenance requests"
       >
-        <button class="btn btn-outline" (click)="loadNotifications()">🔄 Refresh Notifications</button>
+        <button class="btn btn-outline" (click)="loadNotifications()">
+          <app-icon name="refresh-cw" [size]="15"></app-icon>
+          <span>Refresh Notifications</span>
+        </button>
       </app-page-header>
 
       <app-loading-spinner [loading]="loading"></app-loading-spinner>
@@ -37,7 +42,10 @@ import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
         >
           <div class="notif-indicator">
             <span class="channel-icon" [attr.data-channel]="n.channel">
-              {{ n.channel === 'EMAIL' ? '✉️' : (n.channel === 'SMS' ? '📱' : '🔔') }}
+              <app-icon
+                [name]="n.channel === 'EMAIL' ? 'file-text' : (n.channel === 'SMS' ? 'message-square' : 'bell')"
+                [size]="18"
+              ></app-icon>
             </span>
           </div>
 
@@ -61,7 +69,8 @@ import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
               (click)="markAsRead(n)"
               title="Mark as Read"
             >
-              ✓ Mark Read
+              <app-icon name="check" [size]="13"></app-icon>
+              <span>Mark Read</span>
             </button>
             <span *ngIf="n.read" class="read-indicator">Read</span>
           </div>

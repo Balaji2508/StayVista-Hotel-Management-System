@@ -7,6 +7,7 @@ import { ShiftHandoverResponse } from '../../core/models/operations.models';
 import { NotificationUiService } from '../../core/services/notification-ui.service';
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-shift-handover',
@@ -17,7 +18,8 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
     ReactiveFormsModule,
     FormsModule,
     PageHeaderComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
+    IconComponent
   ],
   template: `
     <div class="handover-page">
@@ -27,7 +29,10 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
       >
         <div class="header-actions">
           <a routerLink="/operations/cash-drawer" class="btn btn-outline">Cash Drawer</a>
-          <button class="btn btn-primary" (click)="showNewModal = true">+ Create Handover Note</button>
+          <button class="btn btn-primary" (click)="showNewModal = true">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>Create Handover Note</span>
+          </button>
         </div>
       </app-page-header>
 
@@ -75,7 +80,8 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
               class="btn btn-sm btn-success"
               (click)="acknowledgeHandover(h)"
             >
-              ✓ Acknowledge Handover
+              <app-icon name="check" [size]="14"></app-icon>
+              <span>Acknowledge Handover</span>
             </button>
             <span *ngIf="h.acknowledged" class="ack-info">
               Acknowledged by Staff #{{ h.incomingStaffId || 'Manager' }} on {{ h.acknowledgedAt | date:'short' }}

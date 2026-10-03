@@ -8,6 +8,7 @@ import { NotificationUiService } from '../../core/services/notification-ui.servi
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-leave',
@@ -19,7 +20,8 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
     FormsModule,
     PageHeaderComponent,
     LoadingSpinnerComponent,
-    StatusBadgeComponent
+    StatusBadgeComponent,
+    IconComponent
   ],
   template: `
     <div class="leave-page">
@@ -28,8 +30,14 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
         subtitle="Submit staff leave requests and review pending manager approval workflows"
       >
         <div class="header-actions">
-          <a routerLink="/staff" class="btn btn-outline">← Staff Directory</a>
-          <button class="btn btn-primary" (click)="showRequestModal = true">+ Submit Leave Request</button>
+          <a routerLink="/staff" class="btn btn-outline">
+            <app-icon name="arrow-left" [size]="14"></app-icon>
+            <span>Staff Directory</span>
+          </a>
+          <button class="btn btn-primary" (click)="showRequestModal = true">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>Submit Leave Request</span>
+          </button>
         </div>
       </app-page-header>
 

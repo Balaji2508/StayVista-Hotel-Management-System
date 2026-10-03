@@ -12,6 +12,7 @@ import { NotificationUiService } from '../../core/services/notification-ui.servi
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-waitlist',
@@ -22,7 +23,8 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
     ReactiveFormsModule,
     PageHeaderComponent,
     LoadingSpinnerComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    IconComponent
   ],
   template: `
     <div class="waitlist-page">
@@ -31,8 +33,14 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
         subtitle="Manage overflow booking demand and priority queue for sold-out room categories"
       >
         <div class="header-actions">
-          <a routerLink="/reservations" class="btn btn-outline">← Back to Reservations</a>
-          <button class="btn btn-primary" (click)="showJoinModal = true">+ Add Guest to Waitlist</button>
+          <a routerLink="/reservations" class="btn btn-outline">
+            <app-icon name="arrow-left" [size]="14"></app-icon>
+            <span>Back to Reservations</span>
+          </a>
+          <button class="btn btn-primary" (click)="showJoinModal = true">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>Add Guest to Waitlist</span>
+          </button>
         </div>
       </app-page-header>
 

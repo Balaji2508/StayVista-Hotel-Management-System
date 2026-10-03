@@ -20,9 +20,9 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
   template: `
     <div class="layout-container">
       <app-toast-container></app-toast-container>
-      <app-header></app-header>
+      <app-header (toggleSidebar)="isSidebarOpen = !isSidebarOpen"></app-header>
       <div class="layout-body">
-        <app-sidebar></app-sidebar>
+        <app-sidebar [isOpen]="isSidebarOpen" (closeSidebar)="isSidebarOpen = false"></app-sidebar>
         <main class="main-content">
           <router-outlet></router-outlet>
         </main>
@@ -35,6 +35,7 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      background-color: var(--slate-50);
     }
 
     .layout-body {
@@ -49,13 +50,10 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-    }
-
-    @media (max-width: 768px) {
-      .layout-body {
-        flex-direction: column;
-      }
+      min-width: 0;
     }
   `]
 })
-export class MainLayoutComponent {}
+export class MainLayoutComponent {
+  isSidebarOpen = false;
+}

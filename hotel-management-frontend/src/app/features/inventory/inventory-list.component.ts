@@ -13,6 +13,7 @@ import { NotificationUiService } from '../../core/services/notification-ui.servi
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-inventory-list',
@@ -24,7 +25,8 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
     FormsModule,
     PageHeaderComponent,
     LoadingSpinnerComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    IconComponent
   ],
   template: `
     <div class="inventory-page">
@@ -33,8 +35,14 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
         subtitle="Track hotel stock levels, monitor low-stock thresholds, record stock movements, and automate reorder rules"
       >
         <div class="header-actions">
-          <a routerLink="/purchase/requests" class="btn btn-outline">Procurement & PRs</a>
-          <button class="btn btn-primary" (click)="openItemModal()">+ Add New Item</button>
+          <a routerLink="/purchase/requests" class="btn btn-outline">
+            <app-icon name="shopping-cart" [size]="15"></app-icon>
+            <span>Procurement & PRs</span>
+          </a>
+          <button class="btn btn-primary" (click)="openItemModal()">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>Add New Item</span>
+          </button>
         </div>
       </app-page-header>
 
@@ -61,7 +69,8 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
             [class.active]="showOnlyLowStock"
             (click)="toggleLowStockOnly()"
           >
-            ⚠️ Low Stock Alert ({{ lowStockCount }})
+            <app-icon name="alert-triangle" [size]="14"></app-icon>
+            <span>Low Stock Alert ({{ lowStockCount }})</span>
           </button>
           <button
             *ngFor="let cat of categories"

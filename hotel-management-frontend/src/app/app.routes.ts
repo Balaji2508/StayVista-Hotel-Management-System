@@ -46,6 +46,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/rooms/room-categories.component').then(m => m.RoomCategoriesComponent)
       },
       {
+        path: 'rooms/categories',
+        pathMatch: 'full',
+        redirectTo: 'room-categories'
+      },
+      {
         path: 'rates',
         loadComponent: () => import('./features/rates/rates.component').then(m => m.RatesComponent)
       },

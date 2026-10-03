@@ -15,6 +15,7 @@ import { NotificationUiService } from '../../core/services/notification-ui.servi
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-purchase-requests',
@@ -26,7 +27,8 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
     FormsModule,
     PageHeaderComponent,
     LoadingSpinnerComponent,
-    StatusBadgeComponent
+    StatusBadgeComponent,
+    IconComponent
   ],
   template: `
     <div class="pr-page">
@@ -36,7 +38,10 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
       >
         <div class="header-actions">
           <a routerLink="/purchase/orders" class="btn btn-outline">Purchase Orders</a>
-          <button class="btn btn-primary" (click)="openCreateModal()">+ Create Purchase Request</button>
+          <button class="btn btn-primary" (click)="openCreateModal()">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>Create Purchase Request</span>
+          </button>
         </div>
       </app-page-header>
 
@@ -116,7 +121,8 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
                 [queryParams]="{ prId: pr.id }"
                 class="btn btn-sm btn-primary"
               >
-                Create PO →
+                <span>Create PO</span>
+                <app-icon name="arrow-right" [size]="14"></app-icon>
               </a>
             </div>
           </div>

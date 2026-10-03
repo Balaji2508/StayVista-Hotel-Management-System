@@ -15,6 +15,7 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge/statu
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
 import { HasRoleDirective } from '../../shared/directives/has-role.directive';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-room-list',
@@ -27,7 +28,8 @@ import { HasRoleDirective } from '../../shared/directives/has-role.directive';
     StatusBadgeComponent,
     LoadingSpinnerComponent,
     ConfirmModalComponent,
-    HasRoleDirective
+    HasRoleDirective,
+    IconComponent
   ],
   template: `
     <div class="content-wrapper">
@@ -40,7 +42,8 @@ import { HasRoleDirective } from '../../shared/directives/has-role.directive';
           class="btn btn-primary"
           (click)="openCreateModal()"
         >
-          <span>➕</span> Add Room
+          <app-icon name="plus" [size]="15"></app-icon>
+          <span>Add Room</span>
         </button>
       </app-page-header>
 
@@ -136,8 +139,9 @@ import { HasRoleDirective } from '../../shared/directives/has-role.directive';
                 *hasRole="['ADMIN', 'OWNER']"
                 class="btn btn-sm btn-danger"
                 (click)="confirmDelete(room)"
+                title="Delete Room"
               >
-                🗑️
+                <app-icon name="trash" [size]="14"></app-icon>
               </button>
             </div>
           </div>
@@ -145,7 +149,9 @@ import { HasRoleDirective } from '../../shared/directives/has-role.directive';
 
         <div *ngIf="filteredRooms.length === 0" class="card" style="grid-column: 1 / -1;">
           <div class="empty-state">
-            <div class="empty-state-icon">🛏️</div>
+            <div class="empty-state-icon">
+              <app-icon name="bed" [size]="36" color="#94a3b8"></app-icon>
+            </div>
             <p class="empty-state-text">No rooms found matching the selected filters.</p>
           </div>
         </div>

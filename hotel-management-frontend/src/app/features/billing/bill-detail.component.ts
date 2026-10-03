@@ -10,6 +10,7 @@ import { NotificationUiService } from '../../core/services/notification-ui.servi
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-bill-detail',
@@ -21,7 +22,8 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
     FormsModule,
     PageHeaderComponent,
     LoadingSpinnerComponent,
-    StatusBadgeComponent
+    StatusBadgeComponent,
+    IconComponent
   ],
   template: `
     <div class="billing-page">
@@ -30,8 +32,14 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
         subtitle="Manage itemized folio charges, taxes, discounts, checkout finalization, and official invoices"
       >
         <div class="header-actions">
-          <button *ngIf="bill" class="btn btn-outline" (click)="loadPrintBill()">🖨️ Print / Invoice View</button>
-          <a routerLink="/reservations" class="btn btn-outline">← Back to Reservations</a>
+          <button *ngIf="bill" class="btn btn-outline" (click)="loadPrintBill()">
+            <app-icon name="receipt" [size]="15"></app-icon>
+            <span>Print / Invoice View</span>
+          </button>
+          <a routerLink="/reservations" class="btn btn-outline">
+            <app-icon name="arrow-left" [size]="14"></app-icon>
+            <span>Back to Reservations</span>
+          </a>
         </div>
       </app-page-header>
 
@@ -242,16 +250,19 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
           <div class="modal-header no-print">
             <h3>Invoice Preview</h3>
             <div class="print-actions">
-              <button class="btn btn-primary btn-sm" (click)="triggerBrowserPrint()">🖨️ Print Now</button>
+              <button class="btn btn-primary btn-sm" (click)="triggerBrowserPrint()">
+                <app-icon name="receipt" [size]="14"></app-icon>
+                <span>Print Now</span>
+              </button>
               <button class="close-btn" (click)="showPrintModal = false">&times;</button>
             </div>
           </div>
           <div class="modal-body printable-content" id="printable-area">
             <div class="invoice-header">
               <div class="hotel-info">
-                <h2>GRAND LUXE HOTEL & RESORTS</h2>
-                <p>100 Waterfront Blvd, Hospitality Bay</p>
-                <p>Tel: +1 (555) 234-5678 | Email: billing&#64;grandluxe.com</p>
+                <h2>STAYVISTA HOTELS & RESORTS</h2>
+                <p>100 Hospitality Way, Luxury Suites District</p>
+                <p>Tel: +1 (555) 234-5678 | Email: billing&#64;stayvista.com</p>
               </div>
               <div class="invoice-meta">
                 <h3>INVOICE</h3>

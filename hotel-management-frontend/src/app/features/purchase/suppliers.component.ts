@@ -8,6 +8,7 @@ import { NotificationUiService } from '../../core/services/notification-ui.servi
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-suppliers',
@@ -19,7 +20,8 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
     FormsModule,
     PageHeaderComponent,
     LoadingSpinnerComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    IconComponent
   ],
   template: `
     <div class="suppliers-page">
@@ -30,7 +32,10 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
         <div class="header-actions">
           <a routerLink="/purchase/requests" class="btn btn-outline">Purchase Requests</a>
           <a routerLink="/purchase/orders" class="btn btn-outline">Purchase Orders</a>
-          <button class="btn btn-primary" (click)="openSupplierModal()">+ Register Supplier</button>
+          <button class="btn btn-primary" (click)="openSupplierModal()">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>Register Supplier</span>
+          </button>
         </div>
       </app-page-header>
 
@@ -85,7 +90,10 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
                 </td>
                 <td>{{ sup.paymentTerms || 'Net 30' }}</td>
                 <td>
-                  <span class="rating-stars">⭐ {{ sup.rating ? (sup.rating | number:'1.1-1') : '4.5' }}</span>
+                  <span class="rating-stars">
+                    <app-icon name="star" [size]="13" color="#d97706"></app-icon>
+                    <span>{{ sup.rating ? (sup.rating | number:'1.1-1') : '4.5' }}</span>
+                  </span>
                 </td>
                 <td>
                   <span

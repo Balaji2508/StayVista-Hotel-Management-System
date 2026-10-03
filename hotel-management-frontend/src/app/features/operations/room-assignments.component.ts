@@ -10,6 +10,7 @@ import { NotificationUiService } from '../../core/services/notification-ui.servi
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-room-assignments',
@@ -20,7 +21,8 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
     ReactiveFormsModule,
     PageHeaderComponent,
     LoadingSpinnerComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    IconComponent
   ],
   template: `
     <div class="assignments-page">
@@ -29,8 +31,14 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
         subtitle="Assign floor ranges and room blocks to housekeeping attendants"
       >
         <div class="header-actions">
-          <a routerLink="/operations/housekeeping" class="btn btn-outline">← Housekeeping Tasks</a>
-          <button class="btn btn-primary" (click)="showNewModal = true">+ Assign Room Range</button>
+          <a routerLink="/operations/housekeeping" class="btn btn-outline">
+            <app-icon name="arrow-left" [size]="14"></app-icon>
+            <span>Housekeeping Tasks</span>
+          </a>
+          <button class="btn btn-primary" (click)="showNewModal = true">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>Assign Room Range</span>
+          </button>
         </div>
       </app-page-header>
 

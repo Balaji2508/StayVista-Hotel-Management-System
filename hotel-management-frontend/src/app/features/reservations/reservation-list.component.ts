@@ -9,6 +9,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header.compone
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-reservation-list',
@@ -20,7 +21,8 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
     PageHeaderComponent,
     LoadingSpinnerComponent,
     StatusBadgeComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    IconComponent
   ],
   template: `
     <div class="reservations-page">
@@ -30,7 +32,10 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       >
         <div class="header-actions">
           <a routerLink="/waitlist" class="btn btn-outline">Waitlist Queue</a>
-          <a routerLink="/reservations/new" class="btn btn-primary">+ New Reservation</a>
+          <a routerLink="/reservations/new" class="btn btn-primary">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>New Reservation</span>
+          </a>
         </div>
       </app-page-header>
 

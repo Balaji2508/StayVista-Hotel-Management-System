@@ -7,6 +7,7 @@ import { ShiftResponse, StaffResponse } from '../../core/models/staff.models';
 import { NotificationUiService } from '../../core/services/notification-ui.service';
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-shifts',
@@ -17,7 +18,8 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
     ReactiveFormsModule,
     FormsModule,
     PageHeaderComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
+    IconComponent
   ],
   template: `
     <div class="shifts-page">
@@ -26,8 +28,14 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
         subtitle="Configure morning, evening, and night work shifts and assign team members to rosters"
       >
         <div class="header-actions">
-          <a routerLink="/staff" class="btn btn-outline">← Staff Directory</a>
-          <button class="btn btn-primary" (click)="showNewShiftModal = true">+ Create Shift</button>
+          <a routerLink="/staff" class="btn btn-outline">
+            <app-icon name="arrow-left" [size]="14"></app-icon>
+            <span>Staff Directory</span>
+          </a>
+          <button class="btn btn-primary" (click)="showNewShiftModal = true">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>Create Shift</span>
+          </button>
         </div>
       </app-page-header>
 
@@ -43,14 +51,17 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
           </div>
 
           <div class="time-block">
-            <span class="clock-icon">🕒</span>
+            <span class="clock-icon"><app-icon name="clock" [size]="16" color="#64748b"></app-icon></span>
             <span class="time-text">{{ shift.startTime }} — {{ shift.endTime }}</span>
           </div>
 
           <div class="assigned-section">
             <div class="section-top">
               <h5>Assigned Personnel ({{ shift.assignedStaff?.length || 0 }})</h5>
-              <button class="btn btn-sm btn-outline" (click)="openAssignModal(shift)">+ Assign Staff</button>
+              <button class="btn btn-sm btn-outline" (click)="openAssignModal(shift)">
+                <app-icon name="plus" [size]="13"></app-icon>
+                <span>Assign Staff</span>
+              </button>
             </div>
 
             <div class="staff-chips" *ngIf="shift.assignedStaff?.length">

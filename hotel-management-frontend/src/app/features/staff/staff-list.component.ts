@@ -8,6 +8,7 @@ import { NotificationUiService } from '../../core/services/notification-ui.servi
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-staff-list',
@@ -19,7 +20,8 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
     FormsModule,
     PageHeaderComponent,
     LoadingSpinnerComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    IconComponent
   ],
   template: `
     <div class="staff-page">
@@ -31,7 +33,10 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
           <a routerLink="/staff/attendance" class="btn btn-outline">Clock In & Attendance</a>
           <a routerLink="/staff/shifts" class="btn btn-outline">Shift Rosters</a>
           <a routerLink="/staff/leave" class="btn btn-outline">Leave Requests</a>
-          <button class="btn btn-primary" (click)="openStaffModal()">+ Onboard New Staff</button>
+          <button class="btn btn-primary" (click)="openStaffModal()">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>Onboard New Staff</span>
+          </button>
         </div>
       </app-page-header>
 

@@ -11,6 +11,7 @@ import { RateQuoteResponse } from '../../core/models/rate.models';
 import { NotificationUiService } from '../../core/services/notification-ui.service';
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-reservation-form',
@@ -20,7 +21,8 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
     ReactiveFormsModule,
     RouterModule,
     PageHeaderComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
+    IconComponent
   ],
   template: `
     <div class="reservation-form-page">
@@ -28,7 +30,10 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
         title="Create New Reservation"
         subtitle="Book a room for an existing or newly registered guest with live dynamic pricing quotation"
       >
-        <a routerLink="/reservations" class="btn btn-outline">← Back to Reservations</a>
+        <a routerLink="/reservations" class="btn btn-outline">
+          <app-icon name="arrow-left" [size]="14"></app-icon>
+          <span>Back to Reservations</span>
+        </a>
       </app-page-header>
 
       <app-loading-spinner [loading]="loadingData"></app-loading-spinner>

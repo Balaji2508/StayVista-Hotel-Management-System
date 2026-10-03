@@ -8,6 +8,7 @@ import { NotificationUiService } from '../../core/services/notification-ui.servi
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-attendance',
@@ -18,7 +19,8 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
     FormsModule,
     PageHeaderComponent,
     LoadingSpinnerComponent,
-    StatusBadgeComponent
+    StatusBadgeComponent,
+    IconComponent
   ],
   template: `
     <div class="attendance-page">
@@ -27,8 +29,14 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
         subtitle="Record daily staff clock-ins and clock-outs, monitor active work hours, and track shift compliance"
       >
         <div class="header-actions">
-          <a routerLink="/staff" class="btn btn-outline">← Staff Directory</a>
-          <button class="btn btn-primary" (click)="showClockModal = true">Clock In / Out Employee</button>
+          <a routerLink="/staff" class="btn btn-outline">
+            <app-icon name="arrow-left" [size]="14"></app-icon>
+            <span>Staff Directory</span>
+          </a>
+          <button class="btn btn-primary" (click)="showClockModal = true">
+            <app-icon name="clock" [size]="15"></app-icon>
+            <span>Clock In / Out Employee</span>
+          </button>
         </div>
       </app-page-header>
 

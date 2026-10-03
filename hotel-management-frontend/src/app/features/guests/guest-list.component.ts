@@ -9,6 +9,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
 import { HasRoleDirective } from '../../shared/directives/has-role.directive';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-guest-list',
@@ -20,7 +21,8 @@ import { HasRoleDirective } from '../../shared/directives/has-role.directive';
     PageHeaderComponent,
     LoadingSpinnerComponent,
     ConfirmModalComponent,
-    HasRoleDirective
+    HasRoleDirective,
+    IconComponent
   ],
   template: `
     <div class="content-wrapper">
@@ -29,7 +31,8 @@ import { HasRoleDirective } from '../../shared/directives/has-role.directive';
         subtitle="Manage hotel guest profiles, member codes, and contact records"
       >
         <button class="btn btn-primary" (click)="openCreateModal()">
-          <span>➕</span> Add New Guest
+          <app-icon name="plus" [size]="15"></app-icon>
+          <span>Add New Guest</span>
         </button>
       </app-page-header>
 
@@ -95,7 +98,9 @@ import { HasRoleDirective } from '../../shared/directives/has-role.directive';
               <tr *ngIf="filteredGuests.length === 0">
                 <td colspan="7">
                   <div class="empty-state">
-                    <div class="empty-state-icon">👥</div>
+                    <div class="empty-state-icon">
+                      <app-icon name="users" [size]="36" color="#94a3b8"></app-icon>
+                    </div>
                     <p class="empty-state-text">No guest records match your search.</p>
                   </div>
                 </td>

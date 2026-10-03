@@ -5,6 +5,7 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { NotificationUiService } from '../../core/services/notification-ui.service';
 import { ToastContainerComponent } from '../../shared/components/toast-container/toast-container.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-login',
@@ -13,28 +14,46 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    ToastContainerComponent
+    ToastContainerComponent,
+    IconComponent
   ],
   template: `
     <app-toast-container></app-toast-container>
     <div class="login-page">
       <div class="login-card">
         <div class="login-header">
-          <span class="hotel-icon">🏨</span>
-          <h1 class="hotel-title">Grand Horizon HMS</h1>
-          <p class="hotel-subtitle">Enterprise Hotel Management Platform</p>
+          <div class="brand-badge-icon">
+            <app-icon name="building" [size]="28" color="#ffffff"></app-icon>
+          </div>
+          <h1 class="hotel-title">StayVista</h1>
+          <p class="hotel-subtitle">Enterprise Hotel Management System</p>
         </div>
 
         <!-- Quick Role Switcher for Testing -->
         <div class="quick-roles">
-          <span class="quick-title">Quick Role Login:</span>
+          <div class="quick-title-row">
+            <span class="quick-title">Quick Demo Login</span>
+            <span class="quick-hint">Click to populate</span>
+          </div>
           <div class="role-chips">
-            <button type="button" class="role-chip" (click)="fillRole('admin', 'Admin@123')">Admin</button>
-            <button type="button" class="role-chip" (click)="fillRole('owner', 'Owner@123')">Owner</button>
-            <button type="button" class="role-chip" (click)="fillRole('manager', 'Manager@123')">Manager</button>
-            <button type="button" class="role-chip" (click)="fillRole('receptionist', 'Reception@123')">Receptionist</button>
-            <button type="button" class="role-chip" (click)="fillRole('housekeeper', 'Housekeeper@123')">Housekeeper</button>
-            <button type="button" class="role-chip" (click)="fillRole('johndoe', 'Password@123')">Guest</button>
+            <button type="button" class="role-chip" (click)="fillRole('admin', 'Admin@123')">
+              <span class="chip-role">Admin</span>
+            </button>
+            <button type="button" class="role-chip" (click)="fillRole('owner', 'Owner@123')">
+              <span class="chip-role">Owner</span>
+            </button>
+            <button type="button" class="role-chip" (click)="fillRole('manager', 'Manager@123')">
+              <span class="chip-role">Manager</span>
+            </button>
+            <button type="button" class="role-chip" (click)="fillRole('receptionist', 'Reception@123')">
+              <span class="chip-role">Receptionist</span>
+            </button>
+            <button type="button" class="role-chip" (click)="fillRole('housekeeper', 'Housekeeper@123')">
+              <span class="chip-role">Housekeeper</span>
+            </button>
+            <button type="button" class="role-chip" (click)="fillRole('guest', 'Guest@123')">
+              <span class="chip-role">Guest</span>
+            </button>
           </div>
         </div>
 
@@ -46,7 +65,8 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
               type="text"
               class="form-control"
               formControlName="usernameOrEmail"
-              placeholder="e.g. admin or admin@hms.com"
+              placeholder="e.g. admin or receptionist"
+              autocomplete="username"
             />
             <span
               *ngIf="loginForm.get('usernameOrEmail')?.touched && loginForm.get('usernameOrEmail')?.hasError('required')"
@@ -64,6 +84,7 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
               class="form-control"
               formControlName="password"
               placeholder="••••••••"
+              autocomplete="current-password"
             />
             <span
               *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')"
@@ -82,7 +103,7 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
             class="btn btn-primary btn-block"
             [disabled]="loginForm.invalid || isLoading"
           >
-            <span *ngIf="!isLoading">Sign In</span>
+            <span *ngIf="!isLoading">Sign In to StayVista</span>
             <span *ngIf="isLoading">Authenticating...</span>
           </button>
         </form>
@@ -99,17 +120,32 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      padding: 1.5rem;
+      background: #f8fafc;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    .login-page::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 300px;
+      background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+      pointer-events: none;
     }
 
     .login-card {
       background: #ffffff;
-      border-radius: 16px;
-      padding: 2.5rem;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem 2.25rem;
       width: 100%;
       max-width: 440px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+      position: relative;
+      z-index: 1;
     }
 
     .login-header {
@@ -117,41 +153,60 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
       margin-bottom: 1.75rem;
     }
 
-    .hotel-icon {
-      font-size: 2.75rem;
-      display: inline-block;
-      margin-bottom: 0.5rem;
+    .brand-badge-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.875rem;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
     }
 
     .hotel-title {
-      font-size: 1.5rem;
+      font-size: 1.625rem;
       font-weight: 800;
-      color: #0f172a;
+      color: var(--slate-900);
       margin: 0;
+      letter-spacing: -0.03em;
     }
 
     .hotel-subtitle {
       font-size: 0.875rem;
-      color: #64748b;
+      color: var(--slate-500);
       margin-top: 0.25rem;
+      font-weight: 500;
     }
 
     .quick-roles {
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      border-radius: 10px;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-md);
       padding: 0.875rem;
       margin-bottom: 1.5rem;
     }
 
-    .quick-title {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #475569;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+    .quick-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 0.5rem;
+    }
+
+    .quick-title {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: var(--slate-500);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: var(--font-heading);
+    }
+
+    .quick-hint {
+      font-size: 0.6875rem;
+      color: var(--slate-400);
     }
 
     .role-chips {
@@ -162,18 +217,21 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
 
     .role-chip {
       background: #ffffff;
-      border: 1px solid #cbd5e1;
-      padding: 0.25rem 0.5rem;
-      border-radius: 6px;
-      font-size: 0.6875rem;
+      border: 1px solid var(--slate-200);
+      padding: 0.3125rem 0.625rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
       font-weight: 600;
-      color: #2563eb;
+      color: var(--primary-700);
       cursor: pointer;
-      transition: all 0.15s;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-xs);
     }
+
     .role-chip:hover {
-      background: #eff6ff;
-      border-color: #93c5fd;
+      background: var(--primary-50);
+      border-color: var(--primary-300);
+      transform: translateY(-1px);
     }
 
     .login-form {
@@ -190,11 +248,11 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
     }
 
     .form-error-banner {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #dc2626;
+      background: var(--accent-rose-light);
+      border: 1px solid #fecdd3;
+      color: #be123c;
       padding: 0.625rem 0.875rem;
-      border-radius: 8px;
+      border-radius: var(--radius-md);
       font-size: 0.8125rem;
       font-weight: 500;
     }
@@ -203,16 +261,17 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
       text-align: center;
       margin-top: 1.75rem;
       padding-top: 1.25rem;
-      border-top: 1px solid #f1f5f9;
+      border-top: 1px solid var(--slate-100);
       font-size: 0.875rem;
-      color: #64748b;
+      color: var(--slate-500);
     }
 
     .login-footer a {
-      color: #2563eb;
+      color: var(--primary-600);
       font-weight: 600;
       text-decoration: none;
     }
+
     .login-footer a:hover {
       text-decoration: underline;
     }
@@ -258,7 +317,10 @@ export class LoginComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message || err.error?.error || 'Invalid credentials or account locked. Please check your username and password.';
+        this.errorMessage =
+          err.error?.message ||
+          err.error?.error ||
+          'Invalid credentials or account locked. Please check your username and password.';
       }
     });
   }

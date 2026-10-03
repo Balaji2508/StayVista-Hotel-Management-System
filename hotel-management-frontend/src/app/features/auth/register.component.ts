@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { NotificationUiService } from '../../core/services/notification-ui.service';
 import { ToastContainerComponent } from '../../shared/components/toast-container/toast-container.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-register',
@@ -13,16 +14,19 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    ToastContainerComponent
+    ToastContainerComponent,
+    IconComponent
   ],
   template: `
     <app-toast-container></app-toast-container>
     <div class="register-page">
       <div class="register-card">
         <div class="register-header">
-          <span class="hotel-icon">🏨</span>
+          <div class="brand-badge-icon">
+            <app-icon name="building" [size]="28" color="#ffffff"></app-icon>
+          </div>
           <h1 class="hotel-title">Create Guest Account</h1>
-          <p class="hotel-subtitle">Register to book rooms and access hotel services</p>
+          <p class="hotel-subtitle">Register to book rooms and access StayVista guest services</p>
         </div>
 
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
@@ -34,6 +38,7 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
               class="form-control"
               formControlName="username"
               placeholder="e.g. johndoe"
+              autocomplete="username"
             />
             <span
               *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.hasError('required')"
@@ -57,6 +62,7 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
               class="form-control"
               formControlName="email"
               placeholder="e.g. guest@example.com"
+              autocomplete="email"
             />
             <span
               *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.hasError('required')"
@@ -80,6 +86,7 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
               class="form-control"
               formControlName="password"
               placeholder="Minimum 6 characters"
+              autocomplete="new-password"
             />
             <span
               *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('required')"
@@ -121,17 +128,32 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      padding: 1.5rem;
+      background: #f8fafc;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    .register-page::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 300px;
+      background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+      pointer-events: none;
     }
 
     .register-card {
       background: #ffffff;
-      border-radius: 16px;
-      padding: 2.5rem;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem 2.25rem;
       width: 100%;
       max-width: 440px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+      position: relative;
+      z-index: 1;
     }
 
     .register-header {
@@ -139,23 +161,31 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
       margin-bottom: 1.75rem;
     }
 
-    .hotel-icon {
-      font-size: 2.5rem;
-      display: inline-block;
-      margin-bottom: 0.5rem;
+    .brand-badge-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.875rem;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
     }
 
     .hotel-title {
-      font-size: 1.5rem;
+      font-size: 1.625rem;
       font-weight: 800;
-      color: #0f172a;
+      color: var(--slate-900);
       margin: 0;
+      letter-spacing: -0.03em;
     }
 
     .hotel-subtitle {
       font-size: 0.875rem;
-      color: #64748b;
+      color: var(--slate-500);
       margin-top: 0.25rem;
+      font-weight: 500;
     }
 
     .register-form {
@@ -172,11 +202,11 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
     }
 
     .form-error-banner {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #dc2626;
+      background: var(--accent-rose-light);
+      border: 1px solid #fecdd3;
+      color: #be123c;
       padding: 0.625rem 0.875rem;
-      border-radius: 8px;
+      border-radius: var(--radius-md);
       font-size: 0.8125rem;
       font-weight: 500;
     }
@@ -185,15 +215,19 @@ import { ToastContainerComponent } from '../../shared/components/toast-container
       text-align: center;
       margin-top: 1.75rem;
       padding-top: 1.25rem;
-      border-top: 1px solid #f1f5f9;
+      border-top: 1px solid var(--slate-100);
       font-size: 0.875rem;
-      color: #64748b;
+      color: var(--slate-500);
     }
 
     .register-footer a {
-      color: #2563eb;
+      color: var(--primary-600);
       font-weight: 600;
       text-decoration: none;
+    }
+
+    .register-footer a:hover {
+      text-decoration: underline;
     }
   `]
 })
@@ -220,20 +254,25 @@ export class RegisterComponent {
 
     const { username, email, password } = this.registerForm.value;
 
-    this.authService.register({
-      username: username!,
-      email: email!,
-      password: password!
-    }).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.notificationService.success('Registration successful! Please log in with your credentials.');
-        this.router.navigate(['/login']);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.errorMessage = err.error?.message || err.error?.error || 'Registration failed. The username or email might already be in use.';
-      }
-    });
+    this.authService
+      .register({
+        username: username!,
+        email: email!,
+        password: password!
+      })
+      .subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.notificationService.success('Registration successful! Please log in with your credentials.');
+          this.router.navigate(['/login']);
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.errorMessage =
+            err.error?.message ||
+            err.error?.error ||
+            'Registration failed. The username or email might already be in use.';
+        }
+      });
   }
 }

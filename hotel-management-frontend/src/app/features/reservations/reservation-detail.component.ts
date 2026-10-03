@@ -12,6 +12,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header.compone
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-reservation-detail',
@@ -24,7 +25,8 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
     PageHeaderComponent,
     LoadingSpinnerComponent,
     StatusBadgeComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    IconComponent
   ],
   template: `
     <div class="reservation-detail-page" *ngIf="reservation">
@@ -33,7 +35,10 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
         [subtitle]="'Guest: ' + (reservation.guestName || 'Guest #' + reservation.guestId)"
       >
         <div class="header-actions">
-          <a routerLink="/reservations" class="btn btn-outline">← All Reservations</a>
+          <a routerLink="/reservations" class="btn btn-outline">
+            <app-icon name="arrow-left" [size]="14"></app-icon>
+            <span>All Reservations</span>
+          </a>
           <a [routerLink]="['/billing']" [queryParams]="{ reservationId: reservation.id }" class="btn btn-primary">
             View Bill & Invoices
           </a>

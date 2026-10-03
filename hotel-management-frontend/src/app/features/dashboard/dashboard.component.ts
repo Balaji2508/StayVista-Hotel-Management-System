@@ -11,6 +11,7 @@ import { StatCardComponent } from '../../shared/components/stat-card/stat-card.c
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { HasRoleDirective } from '../../shared/directives/has-role.directive';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 import { DailySummaryResponse } from '../../core/models/reporting.models';
 import { ReservationResponse } from '../../core/models/reservation.models';
 import { ItemResponse } from '../../core/models/inventory.models';
@@ -26,32 +27,54 @@ import { RoomResponse } from '../../core/models/room.models';
     StatCardComponent,
     StatusBadgeComponent,
     LoadingSpinnerComponent,
-    HasRoleDirective
+    HasRoleDirective,
+    IconComponent
   ],
   template: `
     <div class="content-wrapper">
-      <!-- Welcome Header -->
+      <!-- Welcome Header Banner -->
       <div class="dashboard-banner">
         <div class="banner-text">
-          <h1>Welcome back, {{ authService.currentUserSig()?.username }}!</h1>
+          <h1>Welcome to StayVista, {{ authService.currentUserSig()?.username }}!</h1>
           <p>
             Logged in as
-            <strong>{{ authService.currentUserSig()?.role }}</strong>.
-            Here is your hotel operational overview.
+            <strong class="role-highlight">{{ authService.currentUserSig()?.role }}</strong>.
+            Real-time hotel operations and live property metrics.
           </p>
         </div>
         <div class="quick-actions">
-          <a routerLink="/reservations/new" class="btn btn-primary btn-sm">➕ New Reservation</a>
-          <a *hasRole="['ADMIN', 'OWNER', 'MANAGER', 'RECEPTIONIST']"
-             routerLink="/guests" class="btn btn-secondary btn-sm">👥 Register Guest</a>
-          <a *hasRole="['HOUSEKEEPER', 'MANAGER']"
-             routerLink="/operations/housekeeping" class="btn btn-secondary btn-sm">🧹 Clean Tasks</a>
-          <a *hasRole="['GUEST']"
-             routerLink="/guest-experience/requests" class="btn btn-primary btn-sm">🛎️ Request Room Service</a>
+          <a routerLink="/reservations/new" class="btn btn-primary btn-sm">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>New Reservation</span>
+          </a>
+          <a
+            *hasRole="['ADMIN', 'OWNER', 'MANAGER', 'RECEPTIONIST']"
+            routerLink="/guests"
+            class="btn btn-secondary btn-sm"
+          >
+            <app-icon name="users" [size]="15"></app-icon>
+            <span>Register Guest</span>
+          </a>
+          <a
+            *hasRole="['HOUSEKEEPER', 'MANAGER']"
+            routerLink="/operations/housekeeping"
+            class="btn btn-secondary btn-sm"
+          >
+            <app-icon name="sparkles" [size]="15"></app-icon>
+            <span>Cleaning Tasks</span>
+          </a>
+          <a
+            *hasRole="['GUEST']"
+            routerLink="/guest-experience/requests"
+            class="btn btn-primary btn-sm"
+          >
+            <app-icon name="message-square" [size]="15"></app-icon>
+            <span>Room Service</span>
+          </a>
         </div>
       </div>
 
-      <app-loading-spinner *ngIf="isLoading" message="Fetching live hotel metrics..."></app-loading-spinner>
+      <app-loading-spinner *ngIf="isLoading" message="Fetching live StayVista metrics..."></app-loading-spinner>
 
       <div *ngIf="!isLoading">
         <!-- KPI Metrics Grid -->
@@ -60,7 +83,7 @@ import { RoomResponse } from '../../core/models/room.models';
             title="Occupancy Rate"
             [value]="(summary?.occupancyRate || 0) + '%'"
             subtext="Calculated by reporting service"
-            icon="🏨"
+            iconName="building"
             themeClass="theme-blue"
           ></app-stat-card>
 
@@ -68,7 +91,7 @@ import { RoomResponse } from '../../core/models/room.models';
             title="Available Rooms"
             [value]="summary?.availableRooms ?? availableRoomsCount"
             subtext="Ready for guest check-in"
-            icon="🛏️"
+            iconName="bed"
             themeClass="theme-green"
           ></app-stat-card>
 
@@ -76,7 +99,7 @@ import { RoomResponse } from '../../core/models/room.models';
             title="Today's Arrivals"
             [value]="summary?.arrivalsToday ?? 0"
             subtext="Expected check-ins"
-            icon="🧳"
+            iconName="luggage"
             themeClass="theme-amber"
           ></app-stat-card>
 
@@ -84,7 +107,7 @@ import { RoomResponse } from '../../core/models/room.models';
             title="Today's Revenue"
             [value]="'$' + (summary?.totalDailyRevenue || 0 | number:'1.2-2')"
             subtext="Settled invoices & folios"
-            icon="💰"
+            iconName="dollar"
             themeClass="theme-purple"
           ></app-stat-card>
         </div>
@@ -92,22 +115,30 @@ import { RoomResponse } from '../../core/models/room.models';
         <!-- Low Stock Alert Banner (If Any) -->
         <div class="alert-banner warning" *ngIf="lowStockItems.length > 0">
           <div class="alert-content">
-            <span class="alert-icon">⚠️</span>
+            <span class="alert-icon">
+              <app-icon name="alert-triangle" [size]="20" color="#d97706"></app-icon>
+            </span>
             <div>
               <strong>Low Warehouse Stock Warning:</strong>
               <span>
-                {{ lowStockItems.length }} item(s) are below reorder threshold (e.g., {{ lowStockItems[0].name }}).
+                {{ lowStockItems.length }} item(s) are below reorder threshold (e.g. {{ lowStockItems[0].name }}).
               </span>
             </div>
           </div>
-          <a routerLink="/purchase/requests" class="btn btn-sm btn-primary">Create Purchase Request</a>
+          <a routerLink="/purchase/requests" class="btn btn-sm btn-primary">
+            <span>Create Purchase Request</span>
+            <app-icon name="arrow-right" [size]="14"></app-icon>
+          </a>
         </div>
 
         <div class="grid-2">
           <!-- Recent Reservations -->
           <div class="card">
             <div class="card-header">
-              <h2 class="card-title">Recent Reservations</h2>
+              <h2 class="card-title">
+                <app-icon name="calendar" [size]="18" color="#2563eb"></app-icon>
+                <span>Recent Reservations</span>
+              </h2>
               <a routerLink="/reservations" class="btn btn-sm btn-secondary">View All</a>
             </div>
 
@@ -125,7 +156,10 @@ import { RoomResponse } from '../../core/models/room.models';
                 <tbody>
                   <tr *ngFor="let res of recentReservations">
                     <td>
-                      <a [routerLink]="['/reservations', res.id]" style="font-weight: 700; color: #2563eb; text-decoration: none;">
+                      <a
+                        [routerLink]="['/reservations', res.id]"
+                        style="font-weight: 700; color: #2563eb; text-decoration: none;"
+                      >
                         {{ res.reservationCode }}
                       </a>
                     </td>
@@ -139,7 +173,9 @@ import { RoomResponse } from '../../core/models/room.models';
             </div>
             <ng-template #noReservations>
               <div class="empty-state">
-                <div class="empty-state-icon">📅</div>
+                <div class="empty-state-icon">
+                  <app-icon name="calendar" [size]="40" color="#cbd5e1"></app-icon>
+                </div>
                 <p class="empty-state-text">No active reservations found.</p>
               </div>
             </ng-template>
@@ -149,10 +185,16 @@ import { RoomResponse } from '../../core/models/room.models';
           <div class="card">
             <div class="card-header">
               <h2 class="card-title">
-                {{ authService.hasRole('HOUSEKEEPER') ? 'My Cleaning Tasks' : 'Hotel Operational Status' }}
+                <app-icon name="sparkles" [size]="18" color="#059669"></app-icon>
+                <span>
+                  {{ authService.hasRole('HOUSEKEEPER') ? 'My Cleaning Tasks' : 'Hotel Operational Status' }}
+                </span>
               </h2>
-              <a *hasRole="['HOUSEKEEPER', 'MANAGER', 'ADMIN', 'OWNER']"
-                 routerLink="/operations/housekeeping" class="btn btn-sm btn-secondary">
+              <a
+                *hasRole="['HOUSEKEEPER', 'MANAGER', 'ADMIN', 'OWNER']"
+                routerLink="/operations/housekeeping"
+                class="btn btn-sm btn-secondary"
+              >
                 View Housekeeping
               </a>
             </div>
@@ -175,7 +217,10 @@ import { RoomResponse } from '../../core/models/room.models';
                     <td>{{ task.taskType }}</td>
                     <td><app-status-badge [status]="task.status"></app-status-badge></td>
                     <td>
-                      <span class="badge" [ngClass]="task.priority === 'HIGH' ? 'badge-danger' : 'badge-neutral'">
+                      <span
+                        class="badge"
+                        [ngClass]="task.priority === 'HIGH' ? 'badge-danger' : 'badge-neutral'"
+                      >
                         {{ task.priority }}
                       </span>
                     </td>
@@ -185,7 +230,9 @@ import { RoomResponse } from '../../core/models/room.models';
             </div>
             <ng-template #noTasks>
               <div class="empty-state">
-                <div class="empty-state-icon">✨</div>
+                <div class="empty-state-icon">
+                  <app-icon name="sparkles" [size]="40" color="#cbd5e1"></app-icon>
+                </div>
                 <p class="empty-state-text">All housekeeping tasks are clear or verified!</p>
               </div>
             </ng-template>
@@ -197,38 +244,48 @@ import { RoomResponse } from '../../core/models/room.models';
   styles: [`
     .dashboard-banner {
       background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
       padding: 1.5rem 1.75rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1.5rem;
-      gap: 1rem;
+      gap: 1.25rem;
       flex-wrap: wrap;
+      box-shadow: var(--shadow-card);
     }
 
     .banner-text h1 {
       font-size: 1.5rem;
       margin: 0 0 0.25rem;
-      color: #0f172a;
+      color: var(--slate-900);
+      font-weight: 800;
     }
 
     .banner-text p {
       margin: 0;
-      color: #64748b;
+      color: var(--slate-500);
       font-size: 0.875rem;
+    }
+
+    .role-highlight {
+      color: var(--primary-700);
+      background: var(--primary-50);
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--primary-200);
     }
 
     .quick-actions {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.625rem;
       flex-wrap: wrap;
     }
 
     .alert-banner {
       padding: 1rem 1.25rem;
-      border-radius: 10px;
+      border-radius: var(--radius-md);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -250,7 +307,8 @@ import { RoomResponse } from '../../core/models/room.models';
     }
 
     .alert-icon {
-      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
     }
   `]
 })
@@ -275,48 +333,57 @@ export class DashboardComponent implements OnInit {
 
   loadDashboardData(): void {
     this.isLoading = true;
+    let pendingCount = 5;
+    const checkDone = () => {
+      pendingCount--;
+      if (pendingCount <= 0) {
+        this.isLoading = false;
+      }
+    };
 
     // Load available rooms
     this.roomService.getAvailableRooms().subscribe({
       next: (rooms) => {
         this.availableRoomsCount = rooms.length;
+        checkDone();
       },
-      error: () => {}
+      error: () => checkDone()
     });
 
     // Load reporting summary
     this.reportingService.getDailySummary().subscribe({
       next: (data) => {
         this.summary = data;
+        checkDone();
       },
-      error: () => {}
+      error: () => checkDone()
     });
 
     // Load recent reservations
     this.reservationService.getAllReservations().subscribe({
       next: (list) => {
         this.recentReservations = list.slice(0, 5);
+        checkDone();
       },
-      error: () => {}
+      error: () => checkDone()
     });
 
     // Load low stock items
     this.inventoryService.getLowStockItems().subscribe({
       next: (items) => {
         this.lowStockItems = items;
+        checkDone();
       },
-      error: () => {}
+      error: () => checkDone()
     });
 
     // Load housekeeping tasks
     this.operationsService.getAllTasks().subscribe({
       next: (tasks) => {
         this.housekeepingTasks = tasks.slice(0, 5);
-        this.isLoading = false;
+        checkDone();
       },
-      error: () => {
-        this.isLoading = false;
-      }
+      error: () => checkDone()
     });
   }
 }

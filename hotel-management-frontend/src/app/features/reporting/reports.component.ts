@@ -14,6 +14,7 @@ import { NotificationUiService } from '../../core/services/notification-ui.servi
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { StatCardComponent } from '../../shared/components/stat-card.component';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-reports',
@@ -24,7 +25,8 @@ import { StatCardComponent } from '../../shared/components/stat-card.component';
     FormsModule,
     PageHeaderComponent,
     LoadingSpinnerComponent,
-    StatCardComponent
+    StatCardComponent,
+    IconComponent
   ],
   template: `
     <div class="reports-page">
@@ -77,7 +79,8 @@ import { StatCardComponent } from '../../shared/components/stat-card.component';
               <p class="sub-text">Live metrics aggregated by Reporting Service for today</p>
             </div>
             <button class="btn btn-primary btn-sm" (click)="refreshDailySummary()">
-              🔄 Re-aggregate Today's Metrics
+              <app-icon name="refresh-cw" [size]="14"></app-icon>
+              <span>Re-aggregate Today's Metrics</span>
             </button>
           </div>
         </div>
